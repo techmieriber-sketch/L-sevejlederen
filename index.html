@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Læsevejlederen</title>
+    <style>
+        :root { --pink: #1e90ff; }
+
+        html, body { height: 100%; }
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background-image: url('Baggrundsbillede.png');
+            background-size: 70% auto;
+            background-position: center;
+            background-repeat: no-repeat;
+            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+            font-size: 16px;
+            position: relative;
+            color: #ffffff;
+        }
+        
+        /* Responsive background image */
+        @media (max-width: 768px) {
+            body {
+                background-size: 90% auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            body {
+                background-size: 100% auto;
+            }
+        }
+        
+
+        
+        h1 {
+            margin: 0 0 32px 0;
+            font-size: clamp(18px, 2.5vw, 24px);
+            line-height: 1.2;
+            background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #b3d9ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: none;
+            letter-spacing: 0.04em;
+            text-shadow: none;
+            filter: drop-shadow(0 4px 20px rgba(179, 217, 255, 0.3));
+        }
+        .subtitle {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: clamp(14px, 1.5vw, 16px);
+            margin: 24px 0 80px 0;
+            filter: drop-shadow(0 2px 12px rgba(240, 248, 255, 0.4));
+        }
+        
+        /* Search functionality styles */
+        .search-container {
+            position: fixed !important;
+            top: 20px !important;
+            left: 20px !important;
+            z-index: 9999 !important;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 5px;
+            border-radius: 10px;
+        }
+        
+        
+        .search-input {
+            padding: 8px 16px;
+            font-size: 14px;
+            border: 2px solid rgba(179, 217, 255, 0.8);
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            width: 200px;
+            outline: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            color: #000000 !important;
+            font-weight: 500;
+            z-index: 10000 !important;
+        }
+        
+        .search-input:focus {
+            border-color: rgba(179, 217, 255, 0.8);
+            box-shadow: 0 6px 20px rgba(179, 217, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .search-input::placeholder {
+            color: #666;
+            font-style: italic;
+        }
+        
+        .search-input::value,
+        .search-input input {
+            color: #000000 !important;
+        }
+        
+        .search-results {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Responsive search results */
+        @media (max-width: 768px) {
+            .search-results {
+                max-width: 90%;
+                margin-left: 5%;
+                margin-right: 5%;
+            }
+            
+            .search-result {
+                padding: 12px;
+                margin: 8px 0;
+            }
+            
+            .search-result h3 {
+                font-size: 15px;
+            }
+            
+            .search-result p {
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .search-results {
+                max-width: 95%;
+                margin-left: 2.5%;
+                margin-right: 2.5%;
+            }
+            
+            .search-result {
+                padding: 10px;
+                margin: 6px 0;
+            }
+            
+            .search-result h3 {
+                font-size: 14px;
+            }
+            
+            .search-result p {
+                font-size: 12px;
+            }
+        }
+        
+        .search-result {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(179, 217, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .search-result:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(179, 217, 255, 0.2);
+        }
+        
+        .search-result h3 {
+            margin: 0 0 8px 0;
+            color: #000000 !important;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .search-result p {
+            margin: 0;
+            color: #000000 !important;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .search-result a {
+            color: #000000 !important;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .search-result a:hover {
+            color: #1e90ff !important;
+            text-decoration: underline;
+        }
+        
+        /* Override cta-link styles in search results */
+        .search-result .cta-link {
+            color: #000000 !important;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            background-clip: unset !important;
+            filter: none !important;
+        }
+        
+        .search-result .cta-link:hover {
+            color: #1e90ff !important;
+            background: none !important;
+            -webkit-background-clip: unset !important;
+            -webkit-text-fill-color: unset !important;
+            background-clip: unset !important;
+            filter: none !important;
+            text-decoration: underline;
+        }
+        
+        .search-result .highlight {
+            background: rgba(179, 217, 255, 0.5);
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: #000000 !important;
+        }
+        
+        .no-results {
+            text-align: center;
+            color: #000000 !important;
+            font-style: italic;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+        
+        /* Responsive search for mobile */
+        @media (max-width: 768px) {
+            .search-container {
+                top: 20px;
+                left: 15px;
+            }
+            
+            .search-input {
+                width: 160px;
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+        }
+        
+        /* For læsevejledere text in top right corner */
+        .for-læsevejledere {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            color: #000000;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid rgba(179, 217, 255, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .for-læsevejledere:hover {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(179, 217, 255, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(179, 217, 255, 0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .for-læsevejledere {
+                top: 15px;
+                right: 15px;
+                font-size: 13px;
+                padding: 6px 12px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .for-læsevejledere {
+                top: 10px;
+                right: 10px;
+                font-size: 12px;
+                padding: 5px 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .search-container {
+                top: 20px;
+                left: 10px;
+            }
+            
+            .search-input {
+                width: 140px;
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            
+            .search-results {
+                max-width: 90%;
+                margin-left: 5%;
+                margin-right: 5%;
+            }
+        }
+        .wrap {
+            max-width: 2200px;
+            padding: 48px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        video.video {
+            margin-top: 24px;
+            margin-bottom: 32px;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.20);
+            border: 6px solid rgba(255,255,255,0.85);
+        }
+        video.video.smaller {
+            width: 80%;
+            max-width: 80%;
+        }
+        
+        video.video.extra-small {
+            width: 30% !important;
+            max-width: 30% !important;
+        }
+        
+        /* Responsive video design */
+        @media (max-width: 768px) {
+            video.video {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-top: 16px;
+                margin-bottom: 24px;
+            }
+            
+            video.video.smaller {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            
+            video.video.extra-small {
+                width: 80% !important;
+                max-width: 80% !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            video.video {
+                margin-top: 12px;
+                margin-bottom: 20px;
+                border-width: 4px;
+            }
+        }
+        
+        /* Gør video-kontroller meget større */
+        video::-webkit-media-controls-play-button,
+        video::-webkit-media-controls-pause-button {
+            transform: scale(3.0);
+        }
+        
+        video::-webkit-media-controls-timeline {
+            height: 30px;
+        }
+        
+        video::-webkit-media-controls-volume-slider {
+            height: 30px;
+        }
+        
+        video::-webkit-media-controls-mute-button {
+            transform: scale(2.5);
+        }
+        
+        /* Gør fuldskærm-knappen meget større */
+        video::-webkit-media-controls-fullscreen-button {
+            transform: scale(4.0);
+        }
+        .video-title {
+            margin-top: 40px;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 600;
+            font-size: clamp(16px, 1.8vw, 18px);
+            filter: drop-shadow(0 1px 6px rgba(245, 249, 255, 0.3));
+        }
+        a.cta-link {
+            display: inline-block;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            font-size: clamp(12px, 1.5vw, 14px);
+            text-decoration: underline;
+            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+            transition: all 0.3s ease;
+        }
+        a.cta-link:visited { 
+            background: linear-gradient(135deg, #e6f3ff 0%, #b3d9ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        a.cta-link:hover {
+            background: linear-gradient(135deg, #ffffcc 0%, #ffeb99 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 2px 8px rgba(255, 235, 153, 0.4));
+            transform: translateY(-2px);
+        }
+        .section-title {
+            margin-top: 60px;
+            margin-bottom: 32px;
+            background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #cce7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            font-size: clamp(16px, 2vw, 20px);
+            filter: drop-shadow(0 2px 10px rgba(204, 231, 255, 0.3));
+            border-bottom: 3px solid rgba(179, 217, 255, 0.6);
+            padding-bottom: 16px;
+        }
+        .columns {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: auto auto;
+            gap: 0;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            justify-content: center;
+        }
+        
+        /* Juster placering af begge kolonner for at få understregningerne til at flugte */
+        #Baggrundsviden {
+            transform: translateY(0px);
+        }
+        
+        #Dansk-som-andetsprog {
+            transform: translateY(0px);
+        }
+        
+        /* Juster titel styling for bedre alignment */
+        #Dansk-som-andetsprog .section-title {
+            line-height: 1.0;
+            margin-bottom: 0;
+            padding-bottom: 16px;
+        }
+        
+        .columns > div {
+            min-height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+        
+        /* Responsive design for different screen sizes */
+        @media (max-width: 1200px) {
+            .columns {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
+            }
+            
+            .wrap {
+                padding: 32px 24px;
+            }
+        }
+        
+        @media (max-width: 900px) {
+            .columns {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .wrap {
+                padding: 24px 16px;
+            }
+            
+            h1 {
+                font-size: clamp(20px, 4vw, 24px);
+                margin-bottom: 24px;
+            }
+            
+            .subtitle {
+                font-size: clamp(14px, 3vw, 16px);
+                margin: 16px 0 60px 0;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .columns {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .wrap {
+                padding: 20px 12px;
+            }
+            
+            h1 {
+                font-size: clamp(18px, 5vw, 22px);
+                margin-bottom: 20px;
+            }
+            
+            .subtitle {
+                font-size: clamp(13px, 4vw, 15px);
+                margin: 12px 0 40px 0;
+            }
+            
+            .section-title {
+                font-size: clamp(14px, 4vw, 18px);
+                margin-top: 40px;
+                margin-bottom: 24px;
+            }
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background-image: url('Baggrundsbillede.png');
+            background-size: cover;
+            background-position: center;
+            filter: blur(2px) brightness(1.1);
+            transform: scale(1.05);
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(30,144,255,0.08), rgba(30,144,255,0.08));
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="for-laesevejledere.html" class="for-læsevejledere">For læsevejledere</a>
+    
+    
+    <div class="wrap">
+        <h1>Læsevejlederen</h1>
+        <h2 class="subtitle">Hjælp til selvhjælp</h2>
+        <div class="search-container">
+            <input type="text" id="search-input" class="search-input" placeholder="Søg efter emner...">
+            <div id="search-results" class="search-results"></div>
+        </div>
+        <div class="columns">
+            <div style="grid-column: 1 / -1; text-align: center; margin-bottom: 15px; padding: 0;">
+                <p style="color: #ffffff; font-size: clamp(12px, 1.5vw, 16px); margin: 0; text-shadow: 0 2px 6px rgba(0,0,0,0.4); line-height: 1.5;">
+                    På ordlab.dk skal du logge ind i øverste højre hjørne. Vælg Uni-login, og herefter MitID. Gå tilbage til siden her, og klik på linket igen.
+                </p>
+            </div>
+            <div id="IT-værktøjer" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,217,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,217,255,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #b3d9ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">AppWriter</h2>
+                <p>
+                    <a class="cta-link" href="https://youtu.be/aCQG1ovE7HA" target="_blank" rel="noopener">Introduktion til AppWriter</a>
+                </p>
+
+                <p>
+                    <a class="cta-link" href="https://it-info.aarhustech.dk/da/software/generelt/appwriter" target="_blank" rel="noopener">Hent AppWriter</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://chromewebstore.google.com/detail/appwriter-cloud/lokadhdaghfjbmailhhenifjejpokche?hl=da&pli=1" target="_blank" rel="noopener">Hent AppWriter Cloud</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://microsoftedge.microsoft.com/addons/detail/appwriter-cloud/ejkmeinadgefifnopiacgpjlkjdjhhkc?hl=en-GB#:~:text=AppWriter%20is%20able%20to%20convert%20your%20speech%20to,in%20any%20PDF%20e.g.%20homework%2C%20e-books%2C%20and%20forms." target="_blank" rel="noopener">AppWriter Edge Add-on</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://read.bookcreator.com/FgsSBIzPCYh4cEp31F7jauQf0MN2/RsXnoGmIRpyRABb_Elyz5A/K-NJsNGySFGO0nbrjQodLw" target="_blank" rel="noopener">AppWriter ebog</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=20&aid%5B%5D=62" target="_blank" rel="noopener">Windows</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=24&aid%5B%5D=62" target="_blank" rel="noopener">Chromebook</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=21&aid%5B%5D=62" target="_blank" rel="noopener">Macbook</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?share=Orbit!%!Note!%!%!8071,8055,8042,8037" target="_blank" rel="noopener">Orbit Note</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=22&aid%5B%5D=62" target="_blank" rel="noopener">Android</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=23&aid%5B%5D=62" target="_blank" rel="noopener">iPhone og iPad</a>
+                </p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,179,217,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,179,217,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6f3 50%, #ffb3d9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Intowords</h2>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=20&aid%5B%5D=64" target="_blank" rel="noopener">Windows</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=24&aid%5B%5D=64" target="_blank" rel="noopener">Chromebook</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=21&aid%5B%5D=64" target="_blank" rel="noopener">Macbook</a>
+                </p>
+                <h3 class="section-title">Intowords-træneren</h3>
+                <p>
+                    <a class="cta-link" href="https://vimeo.com/744562499/065d453bdd" target="_blank" rel="noopener">lydret stavning</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://vimeo.com/744561692/70a1c698b8" target="_blank" rel="noopener">Jokertegn</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://vimeo.com/744561444/469e14a3b1?turnstile=0.yWnD26pMbVpSzKDTHBdCx7taNKP3eiIqK0pmoZI7HV4siAYNWX0aNG7xCF8WqLIekO3fgWrnMKWIXfBwhUjJ-hpRKIbAdBY4IktEl11KWcT0I11Xaui-7fijTuQ_tS1wQliSW91dxcRaydBHCq5RzEhlr5KlPUDRymjFJw3Z7ndRW93Dj-p8LnCX6PAC3BKjtDP8rcQ25bNzRP2sNl2M14iEqslEjwBrypQHli35BqPN4uF822a50ro09kOWjnUF2eJQaQBS28oK0wYUhbRYc3JbNYWowzZ4ao_Nm93QvA6aEuPy9m1c7uJzXwDjSG5TTYAeTPPnbg72OrKc4N5rYraPhLTwLsemm6eZlmQvwciM7VXTo_W2xkRzqluke5zGb_4bm1F2hc0donr0lKxX7lNUrumNv8DoM4OiiJktvKT9tKMCPW5Uy0UUDaopizQRpbvbDc-QTj2afDA0D3tuVTF0c9TMPXBb7gfGnpPtR0Ex-vIQTlb1XssFQXSnx4VmH-MhSbU8SeTSAGiJXh01wBLAfwuCyxcgR0c5BLg7HHGC3dRxo32w6wm1VEvjqHCucZLkCqUuiq-ch7xV2c1rFASk-UI-sphQ9b1HLtOhNYmQokvrZNsGAMPGS7mkNdzd7Loj1mGYBn2qL4S2S8A40jQ9mA1Fn4IEz7KIL66aIFpYr5ArQKsCxf8OK3rtv8Mgj1QxWwc0j1dD--ZMRSrGJrccTvrPKMkUJv54xAVnwQ8WLPPC4W5inzfRHPFL_v-3ZO9b8fw8EqSMUJ0ZH3i3hza4KTo5ooTPy-gru0pU0e_sBQiyvk84_4wgM3kJOaKBMSzL6GKfuu1pUAQEdVeHZ6Y-e3wo9qlja_ZlTn7zkgkohrix5Yf4IQQnhPqlNb793QRMk2ufA_FrrjS1GErqdA.LHCIsoyFHqW9_xkJqMMeEg.661b99adcbdd41909ef3576fdf0671d6b50f504739ef61009d42abef8008419a" target="_blank" rel="noopener">Fagord</a>
+                </p>
+            </div>
+
+            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
+                <h2 class="section-title" style="white-space: nowrap; background: linear-gradient(135deg, #ffffff 0%, #fff2e6 50%, #ffd9b3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Google Lens</h2>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/video/google-lens-tekstoplaesning/" target="_blank" rel="noopener">Tekstoplæsning</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/video/google-lens-gennemgang-af-funktioner/" target="_blank" rel="noopener">Gennemgang af funktioner</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/video/peter-goer-deltagelse-muligt-for-alle-i-vaerkstedet/" target="_blank" rel="noopener">Deltagelse for alle i værkstedet</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/video/faa-hjaelp-til-at-udvikle-dit-fagsprog-med-en-app/" target="_blank" rel="noopener">Hjælp til at udvikle fagsprog</a>
+                </p>
+            </div>
+
+            <div id="Læseforståelse" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,255,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,255,179,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6ffe6 50%, #b3ffd9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Læsning</h2>
+                <p>
+                    <a class="cta-link" href="https://m365.cloud.microsoft.com/chat/?titleId=T_611d71e5-9f86-b714-c54a-dbb0c755d0b9" target="_blank" rel="noopener">Læseforståelse med Copilot</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://chatgpt.com/g/g-68a344817af08191a37a997523aba125-laeseforstaelse" target="_blank" rel="noopener">Læseforståelse med ChatGPT</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="Grundprompt-til-tekstforstaaelse.pdf" target="_blank" rel="noopener">Grundprompt til tekstforståelse</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://youtu.be/2KQiITCtX8Y" target="_blank" rel="noopener">Oplæsning med Edge-browseren</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="Lærervejledning til Tekstanalyse med Copilot og ChatGPT.pdf" target="_blank" rel="noopener">Lærervejledning til Tekstanalyse med Copilot og ChatGPT</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://m365.cloud.microsoft/chat/?titleId=T_64dbaf73-900b-343b-dd03-dea1dd535d94" target="_blank" rel="noopener">Tekstanalyse med Copilot</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://chatgpt.com/g/g-68c28a412bf48191a35367058a743be4-tekstanalyse" target="_blank" rel="noopener">Tekstanalyse med ChatGPT</a>
+                </p>
+                <h3 class="section-title">Analyse-<br>modeller til</h3>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Noveller</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Artikler</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Reklamer</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Debatindlæg</a>
+                </p>
+
+            </div>
+
+            <div id="Skrivehjælp" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,179,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,179,255,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6ff 50%, #ffb3ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Skrivehjælp</h2>
+                <p>
+                    <a class="cta-link" href="https://m365.cloud.microsoft.com/chat/?titleId=T_28c1653f-107f-84c4-511f-c221664dd09f" target="_blank" rel="noopener">Korrektur med Copilot</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://chatgpt.com/g/g-68b46da6d59c8191b4d23d3bfbd624a8-ret-tekst" target="_blank" rel="noopener">Korrektur med ChatGPT</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://m365.cloud.microsoft/chat/?titleId=T_11dc9572-f6cd-09dd-1bc5-ab0050f08ac7" target="_blank" rel="noopener">Forstå din opgave med Copilot</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://chatgpt.com/g/g-68c14bfa205c81919eeeea242b0412ac-forsta-din-opgave" target="_blank" rel="noopener">Forstå din opgave med ChatGPT</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/1WfB3x6a-eV5GEbo9pc_ERHtAP1_iAIuN?usp=sharing" target="_blank" rel="noopener">Skriveskabelon til notater</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://m365.cloud.microsoft/chat/?titleId=T_f5006552-f1ba-60f3-c44a-cc18c22d0b17" target="_blank" rel="noopener">Få styr på dine notater med Copilot</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://chatgpt.com/g/g-68c15251e6e08191bc074fdf6bafa772-notat-assistenten" target="_blank" rel="noopener">Få styr på dine notater med ChatGPT</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://skrivsikkert.dk/" target="_blank" rel="noopener">Skrivsikkert</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?share=Skriv!%!sikkert!%!%!9722,9725,9746,9761,9766,9751,8260" target="_blank" rel="noopener">Hjælp til Skrivsikkert</a>
+                </p>
+                <h3 class="section-title">Skrive-<br>skabeloner<br>til</h3>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Læserbrev Skriveskabelon</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Instruktion Skriveskabelon</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Debatindlæg Skriveskabelon</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Fagtekst<br>Skriveskabelon</a>
+                </p>
+                <p style="color: #ffffff; margin-left: 0;">
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Fortælling Skriveskabelon</a>
+                </p>
+            </div>
+
+            <div id="Nota" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,217,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,217,255,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #b3d9ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Nota</h2>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/#nemlog-in" target="_blank" rel="noopener">Link til Nota -<br>Log ind med dit MitID</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://youtu.be/G03H0yxigXc?si=XG2xL2qaxqYwnq_l" target="_blank" rel="noopener">Lydbøger på Nota</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?share=Nota!%!%!9735,9816,9731,7360,6081,6027,6018,6011,6006,6001,1521,1518,1515,1509,1506,1499,1494" target="_blank" rel="noopener">Hjælp til Nota</a>
+                </p>
+                <p><a href="https://www.youtube.com/watch?v=blyTZLL_xHY" target="_blank" rel="noopener" class="cta-link">Download skolebog fra Nota og få den læst højt med AW</a></p>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/viden/videoguides-til-brug-af-l%C3%A5ste-studieb%C3%B8ger" target="_blank" rel="noopener">Videoguides til brug af låste studiebøger</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/viden/bogformater" target="_blank" rel="noopener">Nota app - Find det rigtige bogformat</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/viden/afspilning-og-l%C3%A6sning" target="_blank" rel="noopener">Nota app - Afspilning og læsning</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/viden/tilf%C3%B8j-bogm%C3%A6rker" target="_blank" rel="noopener">Nota app - Tilføj bogmærker med noter</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/viden/boghylde-og-personlige-boglister" target="_blank" rel="noopener">Nota app - Boghylde og personlige boglister</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://nota.dk/viden/udvidet-s%C3%B8gning" target="_blank" rel="noopener">Nota app - Udvidet søgning</a>
+                </p>
+            </div>
+
+            <div id="Baggrundsviden" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,255,217,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,255,217,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6ffe6 50%, #b3ffd9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Baggrundsviden</h2>
+                <p>
+                    <a class="cta-link" href="https://youtu.be/xLAJxrBgsdg?si=6l6mtPTfwPqtCAX0" target="_blank" rel="noopener">Den ordblinde hjerne</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://youtu.be/86giFyrNesw?si=1vZliafMOk3X9sh-" target="_blank" rel="noopener">Hvordan opleves ordblindhed?</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://www.ordblindeforeningen.dk/" target="_blank" rel="noopener">Ordblindeforeningen</a>
+                </p>
+
+            </div>
+
+            <div id="Dansk-som-andetsprog" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6e6 50%, #ffd9b3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dansk som andetsprog</h2>
+                <p><a href="https://ordlab.dk/alle-videoer/?share=Bedre!%!dansk!%!(Gratis)!%!%!3751,3765" target="_blank" rel="noopener" class="cta-link">Bedre dansk (Gratis)</a></p>
+                <p><a href="https://ordlab.dk/alle-videoer/?share=Bedre!%!dansk!%!(Premium)!%!%!3754,3760,3763,3757" target="_blank" rel="noopener" class="cta-link">Bedre dansk (Premium)</a></p>
+                <p><a href="https://drive.google.com/drive/folders/1cUmiCmQzDshnFyYLvbC4thB_P5lyc0HM?usp=sharing" target="_blank" rel="noopener" class="cta-link">Sprogmakker</a></p>
+                <p><a href="https://www.youtube.com/watch?v=MFvDGZVD3Qw&list=PLk6g9tySafarm-24K2ztZRXHhjkG9R2LC" target="_blank" rel="noopener" class="cta-link">Sådan siger man</a></p>
+                <p><a href="https://www.youtube.com/watch?v=Ik_0DJu_dP8&list=PLk6g9tySafaqdGAp4lufNQU9o-b-C0CPG" target="_blank" rel="noopener" class="cta-link">Danish Vowels</a></p>
+                <p><a href="https://www.youtube.com/watch?v=0vaSpM3LenM&list=PLk6g9tySafapSyrz09XR_5swfBYrwLYrg" target="_blank" rel="noopener" class="cta-link">Danske vokaler</a></p>
+                <p><a href="https://www.youtube.com/watch?v=BHPKB9sBJT8&list=PLk6g9tySafaqjJJaz9OTTHoTFJjFN7dLo" target="_blank" rel="noopener" class="cta-link">Danish Pronunciation for beginners</a></p>
+                <p><a href="https://www.youtube.com/watch?v=WiHkOa55ZZI&list=PLk6g9tySafar_Zbj-93nFFzW4GnKsjM1c" target="_blank" rel="noopener" class="cta-link">Danske dialoger</a></p>
+                <p><a href="https://www.youtube.com/watch?v=W9YgPXDtDV0&list=PLk6g9tySafapZcYjKW0lffiCJBiOWg3lX" target="_blank" rel="noopener" class="cta-link">Dansk udtale for lidt øvede</a></p>
+                <p><a href="https://www.youtube.com/watch?v=sh9arggYnrY&list=PLk6g9tySafaoeb8kXu9KBAjagCxCymcWY" target="_blank" rel="noopener" class="cta-link">Dansk udtale for øvede</a></p>
+                <p><a class="cta-link" href="https://www.youtube.com/watch?v=W9YgPXDtDV0&list=PLk6g9tySafaqKlQ0uFD2uGikcZ4SbG2Vf" target="_blank" rel="noopener">Danske konsonanter</a></p>
+                <p><a class="cta-link" href="https://www.youtube.com/watch?v=OXkDp4uA2aA&list=PLzQVrtlP5LA4oTQxygqdygvw8lxy58wDs" target="_blank" rel="noopener">Dansk sprog, grammatik og udtale</a></p>
+            </div>
+
+
+        </div>
+    </div>
+    
+    <script>
+        
+        // Search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('search-input');
+            const searchResults = document.getElementById('search-results');
+            
+            // Search function
+            function performSearch(query) {
+                if (query.length < 2) {
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                const results = [];
+                const sections = document.querySelectorAll('.columns > div');
+                
+                sections.forEach((section, index) => {
+                    if (index === 0) return; // Skip the first info section
+                    
+                    const title = section.querySelector('h2, h3')?.textContent || '';
+                    const links = section.querySelectorAll('a');
+                    const sectionText = section.textContent.toLowerCase();
+                    
+                    if (sectionText.includes(query.toLowerCase())) {
+                        const matchingLinks = [];
+                        
+                        links.forEach(link => {
+                            if (link.textContent.toLowerCase().includes(query.toLowerCase())) {
+                                matchingLinks.push({
+                                    text: link.textContent,
+                                    href: link.href,
+                                    section: title
+                                });
+                            }
+                        });
+                        
+                        if (matchingLinks.length > 0) {
+                            results.push({
+                                section: title,
+                                links: matchingLinks
+                            });
+                        }
+                    }
+                });
+                
+                displayResults(results, query);
+            }
+            
+            // Display search results
+            function displayResults(results, query) {
+                if (results.length === 0) {
+                    searchResults.innerHTML = '<div class="no-results">Ingen resultater fundet for "' + query + '"</div>';
+                    searchResults.style.display = 'block';
+                    return;
+                }
+                
+                let html = '';
+                results.forEach(result => {
+                    html += '<div class="search-result">';
+                    html += '<h3>' + result.section + '</h3>';
+                    result.links.forEach(link => {
+                        const highlightedText = link.text.replace(
+                            new RegExp(query, 'gi'), 
+                            '<span class="highlight">$&</span>'
+                        );
+                        html += '<p><a href="' + link.href + '" target="_blank" class="cta-link">' + highlightedText + '</a></p>';
+                    });
+                    html += '</div>';
+                });
+                
+                searchResults.innerHTML = html;
+                searchResults.style.display = 'block';
+            }
+            
+            // Event listeners
+            searchInput.addEventListener('input', function() {
+                const query = this.value.trim();
+                performSearch(query);
+            });
+            
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const query = this.value.trim();
+                    performSearch(query);
+                }
+            });
+            
+            // Clear results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    searchResults.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
