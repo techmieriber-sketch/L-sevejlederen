@@ -431,7 +431,7 @@
         }
         .section-title {
             margin-top: 60px;
-            margin-bottom: 32px;
+            margin-bottom: 0;
             background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #cce7ff 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -441,6 +441,8 @@
             filter: drop-shadow(0 2px 10px rgba(204, 231, 255, 0.3));
             border-bottom: 3px solid rgba(179, 217, 255, 0.6);
             padding-bottom: 16px;
+            line-height: 1.2;
+            min-height: calc(1.2em + 16px + 3px);
         }
         .columns {
             display: grid;
@@ -451,42 +453,55 @@
             max-width: 100%;
             margin: 0 auto;
             justify-content: center;
+            align-items: start;
         }
         
-        /* Juster placering af begge kolonner for at få understregningerne til at flugte */
-        #Baggrundsviden {
-            transform: translateY(0px);
-        }
-        
-        #Dansk-som-andetsprog {
-            transform: translateY(0px);
-        }
-        
-        #Dansk-grammatik {
-            transform: translateY(0px);
-        }
-        
+        /* Sørg for at alle kategorier starter på samme position */
+        #Baggrundsviden,
+        #Dansk-som-andetsprog,
+        #Dansk-grammatik,
         #Engelsk {
-            transform: translateY(0px);
+            display: flex;
+            flex-direction: column;
         }
         
-        /* Juster titel styling for bedre alignment */
-        #Dansk-som-andetsprog .section-title {
-            line-height: 1.0;
-            margin-bottom: 0;
-            padding-bottom: 16px;
-        }
-        
-        #Dansk-grammatik .section-title {
-            line-height: 1.0;
-            margin-bottom: 0;
-            padding-bottom: 16px;
-        }
-        
+        /* Sørg for at alle titler har samme styling for alignment */
+        #Baggrundsviden .section-title,
+        #Dansk-som-andetsprog .section-title,
+        #Dansk-grammatik .section-title,
         #Engelsk .section-title {
-            line-height: 1.0;
+            margin-top: 60px;
             margin-bottom: 0;
             padding-bottom: 16px;
+            line-height: 1.2;
+            min-height: calc(1.2em + 16px + 3px);
+            box-sizing: border-box;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Sørg for at understregningen er på samme position */
+        #Baggrundsviden .section-title::after,
+        #Dansk-som-andetsprog .section-title::after,
+        #Dansk-grammatik .section-title::after,
+        #Engelsk .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(179, 217, 255, 0.6);
+        }
+        
+        /* Fjern border-bottom fra titlerne, da vi bruger ::after i stedet */
+        #Baggrundsviden .section-title,
+        #Dansk-som-andetsprog .section-title,
+        #Dansk-grammatik .section-title,
+        #Engelsk .section-title {
+            border-bottom: none;
         }
         
         .columns > div {
