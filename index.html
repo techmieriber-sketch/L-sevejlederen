@@ -251,7 +251,8 @@
         
         /* For læsevejledere text in top right corner */
         .for-læsevejledere,
-        .for-undervisere {
+        .for-undervisere,
+        .for-dansk-som-andetsprog {
             position: fixed;
             right: 20px;
             z-index: 1000;
@@ -277,8 +278,13 @@
             top: 60px;
         }
         
+        .for-dansk-som-andetsprog {
+            top: 100px;
+        }
+        
         .for-læsevejledere:hover,
-        .for-undervisere:hover {
+        .for-undervisere:hover,
+        .for-dansk-som-andetsprog:hover {
             background: rgba(255, 255, 255, 0.95);
             border-color: rgba(179, 217, 255, 0.6);
             transform: translateY(-2px);
@@ -287,7 +293,8 @@
         
         @media (max-width: 768px) {
             .for-læsevejledere,
-            .for-undervisere {
+            .for-undervisere,
+            .for-dansk-som-andetsprog {
                 right: 15px;
                 font-size: 13px;
                 padding: 6px 12px;
@@ -300,11 +307,16 @@
             .for-undervisere {
                 top: 50px;
             }
+            
+            .for-dansk-som-andetsprog {
+                top: 85px;
+            }
         }
         
         @media (max-width: 480px) {
             .for-læsevejledere,
-            .for-undervisere {
+            .for-undervisere,
+            .for-dansk-som-andetsprog {
                 right: 10px;
                 font-size: 12px;
                 padding: 5px 10px;
@@ -316,6 +328,10 @@
             
             .for-undervisere {
                 top: 45px;
+            }
+            
+            .for-dansk-som-andetsprog {
+                top: 80px;
             }
         }
         
@@ -623,6 +639,7 @@
 
     <a href="for-laesevejledere.html" class="for-læsevejledere">For læsevejledere</a>
     <a href="https://techmieriber-sketch.github.io/Underviserens-guide/" class="for-undervisere" target="_blank" rel="noopener">For undervisere</a>
+    <a href="#Dansk-som-andetsprog" class="for-dansk-som-andetsprog">Dansk som andetsprog</a>
     
     
     <div class="wrap">
