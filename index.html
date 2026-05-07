@@ -1,4 +1,4 @@
-t<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="da">
 <head>
     <meta charset="UTF-8" />
@@ -8,36 +8,40 @@ t<!DOCTYPE html>
         :root { --pink: #1e90ff; }
 
         html, body { height: 100%; }
+        /* Full-page bg on html: Chrome can fail to composite body::before when body is display:flex. */
+        html::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background-image: url('Baggrundsbillede.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            filter: blur(2px) brightness(1.1);
+            transform: scale(1.05);
+            pointer-events: none;
+        }
+        html::after {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: linear-gradient(rgba(30,144,255,0.08), rgba(30,144,255,0.08));
+            pointer-events: none;
+        }
         body {
             margin: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            background-image: url('Baggrundsbillede.png');
-            background-size: 70% auto;
-            background-position: center;
-            background-repeat: no-repeat;
+            position: relative;
+            z-index: 2;
             font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
             font-size: 16px;
-            position: relative;
             color: #ffffff;
         }
-        
-        /* Responsive background image */
-        @media (max-width: 768px) {
-            body {
-                background-size: 90% auto;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            body {
-                background-size: 100% auto;
-            }
-        }
-        
-
         
         h1 {
             margin: 0 0 32px 0;
@@ -613,26 +617,6 @@ t<!DOCTYPE html>
                 margin-bottom: 24px;
             }
         }
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background-image: url('Baggrundsbillede.png');
-            background-size: cover;
-            background-position: center;
-            filter: blur(2px) brightness(1.1);
-            transform: scale(1.05);
-            z-index: 0;
-            pointer-events: none;
-        }
-        body::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(rgba(30,144,255,0.08), rgba(30,144,255,0.08));
-            z-index: 1;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
@@ -874,6 +858,19 @@ t<!DOCTYPE html>
                     <a class="cta-link" href="https://www.ordblindeforeningen.dk/" target="_blank" rel="noopener">Ordblindeforeningen</a>
                 </p>
 
+            </div>
+
+            <div id="Visuel-ordblindhed" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(200,179,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(200,179,255,0.2);">
+                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ede6ff 50%, #c8b3ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Visuel ordblindhed</h2>
+                <p>
+                    <a class="cta-link" href="https://lexilens.dk/" target="_blank" rel="noopener">Sådan opleves visuelle læseudfordringer</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://techmieriber-sketch.github.io/Laesefilter/" target="_blank" rel="noopener">Læsefilter</a>
+                </p>
+                <p>
+                    <a class="cta-link" href="https://drive.google.com/drive/folders/1YgsDodYVOIrDOiHKYSH0ky-sWkEHZARg?usp=sharing" target="_blank" rel="noopener">Læsefilter som browserudvidelse</a>
+                </p>
             </div>
 
             <div id="Dansk-som-andetsprog" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
