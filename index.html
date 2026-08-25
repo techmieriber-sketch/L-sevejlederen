@@ -5,1038 +5,1169 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Læsevejlederen</title>
     <style>
-        :root { --pink: #1e90ff; }
+        :root {
+            --bg-top: #1b4f86;
+            --bg-bottom: #122f52;
+            --card-bg: rgba(255, 255, 255, 0.055);
+            --card-border: rgba(168, 208, 255, 0.18);
+            --card-border-strong: rgba(168, 208, 255, 0.4);
+            --text: #f2f8ff;
+            --text-muted: rgba(214, 232, 255, 0.72);
+            --accent: #8ec9ff;
+            --accent-warm: #ffe4a3;
+            --radius: 18px;
+        }
 
-        html, body { height: 100%; }
-        /* Full-page bg on html: Chrome can fail to composite body::before when body is display:flex. */
-        html::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-image: url('Baggrundsbillede.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            filter: blur(2px) brightness(1.1);
-            transform: scale(1.05);
-            pointer-events: none;
+        * { box-sizing: border-box; }
+
+        /* Holder svg-filteret ude af layoutet */
+        .filter-defs {
+            position: absolute;
+            width: 0;
+            height: 0;
+            overflow: hidden;
         }
-        html::after {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            background: linear-gradient(rgba(30,144,255,0.08), rgba(30,144,255,0.08));
-            pointer-events: none;
+
+        html {
+            scroll-behavior: smooth;
         }
+
         body {
             margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-size: 17px;
+            line-height: 1.5;
+            color: var(--text);
+            background: linear-gradient(180deg, var(--bg-top) 0%, #17416e 45%, var(--bg-bottom) 100%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a:focus-visible,
+        summary:focus-visible,
+        input:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 3px;
+            border-radius: 6px;
+        }
+
+        /* ---------- Topbjælke ---------- */
+        .topbar {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            position: relative;
-            z-index: 2;
-            font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-            font-size: 16px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 18px 24px 0;
+        }
+        /* Mørkeblå bund i knapperne, så de kan læses både over lyse og mørke dele af fotoet */
+        .topbar a {
+            padding: 8px 15px;
+            border-radius: 999px;
+            border: 1px solid rgba(186, 219, 255, 0.5);
+            background: rgba(12, 42, 76, 0.62);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
             color: #ffffff;
-        }
-        
-        h1 {
-            margin: 0 0 32px 0;
-            font-size: clamp(18px, 2.5vw, 24px);
-            line-height: 1.2;
-            background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #b3d9ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-transform: none;
-            letter-spacing: 0.04em;
-            text-shadow: none;
-            filter: drop-shadow(0 4px 20px rgba(179, 217, 255, 0.3));
-        }
-        .subtitle {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-size: clamp(14px, 1.5vw, 16px);
-            margin: 24px 0 80px 0;
-            filter: drop-shadow(0 2px 12px rgba(240, 248, 255, 0.4));
-        }
-        
-        /* Search functionality styles */
-        .search-container {
-            position: fixed !important;
-            top: 20px !important;
-            left: 20px !important;
-            z-index: 9999 !important;
-            text-align: left;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 5px;
-            border-radius: 10px;
-        }
-        
-        
-        .search-input {
-            padding: 8px 16px;
             font-size: 14px;
-            border: 2px solid rgba(179, 217, 255, 0.8);
-            border-radius: 20px;
-            background: rgba(255, 255, 255, 0.98) !important;
-            width: 200px;
-            outline: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            color: #000000 !important;
-            font-weight: 500;
-            z-index: 10000 !important;
+            font-weight: 600;
+            text-decoration: none;
+            text-shadow: 0 1px 4px rgba(6, 20, 38, 0.5);
+            transition: all 0.25s ease;
         }
-        
-        .search-input:focus {
-            border-color: rgba(179, 217, 255, 0.8);
-            box-shadow: 0 6px 20px rgba(179, 217, 255, 0.3);
-            transform: translateY(-2px);
+        .topbar a:hover {
+            background: rgba(12, 42, 76, 0.85);
+            border-color: var(--card-border-strong);
         }
-        
-        .search-input::placeholder {
-            color: #666;
-            font-style: italic;
-        }
-        
-        .search-input::value,
-        .search-input input {
-            color: #000000 !important;
-        }
-        
-        .search-results {
-            margin-top: 20px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
+
+        /* "Om Ordlab.dk" som knap i topbjælken med udfoldelig forklaring.
+           auto-margin holder den i venstre hjørne, mens de øvrige links bliver højrestillet */
+        .topbar-info {
+            position: relative;
             margin-right: auto;
         }
-        
-        /* Responsive search results */
-        @media (max-width: 768px) {
-            .search-results {
-                max-width: 90%;
-                margin-left: 5%;
-                margin-right: 5%;
-            }
-            
-            .search-result {
-                padding: 12px;
-                margin: 8px 0;
-            }
-            
-            .search-result h3 {
-                font-size: 15px;
-            }
-            
-            .search-result p {
-                font-size: 13px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .search-results {
-                max-width: 95%;
-                margin-left: 2.5%;
-                margin-right: 2.5%;
-            }
-            
-            .search-result {
-                padding: 10px;
-                margin: 6px 0;
-            }
-            
-            .search-result h3 {
-                font-size: 14px;
-            }
-            
-            .search-result p {
-                font-size: 12px;
-            }
-        }
-        
-        .search-result {
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid rgba(179, 217, 255, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            margin: 10px 0;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .search-result:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(179, 217, 255, 0.2);
-        }
-        
-        .search-result h3 {
-            margin: 0 0 8px 0;
-            color: #000000 !important;
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .search-result p {
-            margin: 0;
-            color: #000000 !important;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .search-result a {
-            color: #000000 !important;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .search-result a:hover {
-            color: #1e90ff !important;
-            text-decoration: underline;
-        }
-        
-        /* Override cta-link styles in search results */
-        .search-result .cta-link {
-            color: #000000 !important;
-            background: none !important;
-            -webkit-background-clip: unset !important;
-            -webkit-text-fill-color: unset !important;
-            background-clip: unset !important;
-            filter: none !important;
-        }
-        
-        .search-result .cta-link:hover {
-            color: #1e90ff !important;
-            background: none !important;
-            -webkit-background-clip: unset !important;
-            -webkit-text-fill-color: unset !important;
-            background-clip: unset !important;
-            filter: none !important;
-            text-decoration: underline;
-        }
-        
-        .search-result .highlight {
-            background: rgba(179, 217, 255, 0.5);
-            padding: 2px 4px;
-            border-radius: 4px;
-            font-weight: bold;
-            color: #000000 !important;
-        }
-        
-        .no-results {
-            text-align: center;
-            color: #000000 !important;
-            font-style: italic;
-            margin-top: 20px;
-            font-weight: 500;
-        }
-        
-        /* Responsive search for mobile */
-        @media (max-width: 768px) {
-            .search-container {
-                top: 20px;
-                left: 15px;
-            }
-            
-            .search-input {
-                width: 160px;
-                padding: 6px 12px;
-                font-size: 13px;
-            }
-        }
-        
-        /* For læsevejledere text in top right corner */
-        .for-læsevejledere,
-        .for-undervisere,
-        .for-dansk-som-andetsprog {
-            position: fixed;
-            right: 20px;
-            z-index: 1000;
-            color: #000000;
+        .topbar-info > summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 15px;
+            border-radius: 999px;
+            border: 1px solid rgba(186, 219, 255, 0.5);
+            background: rgba(12, 42, 76, 0.62);
+            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(8px);
+            color: #ffffff;
             font-size: 14px;
             font-weight: 600;
-            background: rgba(255, 255, 255, 0.96);
-            padding: 8px 16px;
-            border-radius: 20px;
-            border: 2px solid rgba(179, 217, 255, 0.3);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: block;
+            text-shadow: 0 1px 4px rgba(6, 20, 38, 0.5);
+            cursor: pointer;
+            list-style: none;
+            transition: all 0.25s ease;
         }
-        
-        .for-læsevejledere {
-            top: 20px;
+        .topbar-info > summary::-webkit-details-marker { display: none; }
+        .topbar-info > summary::marker { content: ""; }
+        .topbar-info > summary:hover {
+            background: rgba(12, 42, 76, 0.85);
+            border-color: var(--card-border-strong);
         }
-        
-        .for-undervisere {
-            top: 60px;
+        .topbar-info .chev {
+            width: 12px;
+            height: 12px;
+            flex: 0 0 auto;
+            color: var(--accent);
+            transition: transform 0.25s ease;
         }
-        
-        .for-dansk-som-andetsprog {
-            top: 100px;
+        .topbar-info[open] .chev { transform: rotate(90deg); }
+        .topbar-info-panel {
+            position: absolute;
+            top: calc(100% + 9px);
+            left: 0;
+            width: min(360px, 84vw);
+            padding: 14px 16px;
+            text-align: left;
+            background: rgba(13, 30, 48, 0.94);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            box-shadow: 0 20px 46px rgba(3, 11, 20, 0.5);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            color: rgba(230, 242, 255, 0.92);
+            font-size: 14.5px;
+            line-height: 1.5;
+            z-index: 40;
         }
-        
-        .for-læsevejledere:hover,
-        .for-undervisere:hover,
-        .for-dansk-som-andetsprog:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: rgba(179, 217, 255, 0.6);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(179, 217, 255, 0.2);
+        .topbar-info-panel a {
+            padding: 0;
+            border: 0;
+            background: none;
+            -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
         }
-        
-        @media (max-width: 768px) {
-            .for-læsevejledere,
-            .for-undervisere,
-            .for-dansk-som-andetsprog {
-                right: 15px;
-                font-size: 13px;
-                padding: 6px 12px;
-            }
-            
-            .for-læsevejledere {
-                top: 15px;
-            }
-            
-            .for-undervisere {
-                top: 50px;
-            }
-            
-            .for-dansk-som-andetsprog {
-                top: 85px;
-            }
+        .topbar-info-panel a:hover {
+            background: none;
+            color: var(--accent-warm);
         }
-        
-        @media (max-width: 480px) {
-            .for-læsevejledere,
-            .for-undervisere,
-            .for-dansk-som-andetsprog {
-                right: 10px;
-                font-size: 12px;
-                padding: 5px 10px;
-            }
-            
-            .for-læsevejledere {
-                top: 10px;
-            }
-            
-            .for-undervisere {
-                top: 45px;
-            }
-            
-            .for-dansk-som-andetsprog {
-                top: 80px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .search-container {
-                top: 20px;
-                left: 10px;
-            }
-            
-            .search-input {
-                width: 140px;
-                padding: 5px 10px;
-                font-size: 12px;
-            }
-            
-            .search-results {
-                max-width: 90%;
-                margin-left: 5%;
-                margin-right: 5%;
-            }
-        }
-        .wrap {
-            max-width: 2200px;
-            padding: 48px;
+
+        /* ---------- Toppen med foto ---------- */
+        .hero {
+            position: relative;
+            /* Højden er sat, så man kan se både eleven, den bærbare og lokalet på fotoet */
+            min-height: 500px;
+            padding-bottom: 46px;
             text-align: center;
+        }
+        /* Egen beholder til fotolagene, så søgeresultater kan hænge ud over toppen */
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
+        /* Fotoet ligger kun i toppen og er dæmpet, så teksten kan læses oven på det */
+        .hero-bg::before {
+            content: "";
+            position: absolute;
+            inset: -10px -10px 0 -10px;
+            background-image: url('Topbillede.png');
+            background-size: cover;
+            background-position: center 52%;
+            /* Hvidbalance i stedet for afmætning: fjerner det blå stik, men bevarer hud- og hårfarver */
+            filter: url(#hvidbalance) blur(1px) saturate(1.1) brightness(1.1) contrast(0.98);
+            z-index: 0;
+        }
+        /* Blødt skær bag teksten + overgang til sidens farve nederst */
+        .hero-bg::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(62% 58% at 50% 38%, rgba(24, 30, 38, 0.4) 0%, rgba(24, 30, 38, 0.14) 62%, rgba(24, 30, 38, 0) 100%),
+                linear-gradient(180deg, rgba(27, 79, 134, 0) 0%, rgba(27, 79, 134, 0.06) 62%, rgba(27, 79, 134, 0.6) 88%, var(--bg-top) 100%);
+            z-index: 1;
+        }
+        .hero > .topbar,
+        .hero > .hero-inner {
             position: relative;
             z-index: 2;
+        }
+        .hero-inner {
+            max-width: 860px;
             margin: 0 auto;
-            width: 100%;
-            box-sizing: border-box;
+            padding: 14px 24px 0;
         }
-        video.video {
-            margin-top: 24px;
-            margin-bottom: 32px;
-            width: 100% !important;
-            max-width: 100% !important;
-            height: auto;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.20);
-            border: 6px solid rgba(255,255,255,0.85);
+        h1 {
+            margin: 22px 0 0;
+            font-size: clamp(30px, 4.6vw, 46px);
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            text-shadow: 0 2px 10px rgba(4, 12, 22, 0.75), 0 8px 34px rgba(4, 12, 22, 0.6);
         }
-        video.video.smaller {
-            width: 80%;
-            max-width: 80%;
-        }
-        
-        video.video.extra-small {
-            width: 30% !important;
-            max-width: 30% !important;
-        }
-        
-        /* Responsive video design */
-        @media (max-width: 768px) {
-            video.video {
-                width: 100% !important;
-                max-width: 100% !important;
-                margin-top: 16px;
-                margin-bottom: 24px;
-            }
-            
-            video.video.smaller {
-                width: 100% !important;
-                max-width: 100% !important;
-            }
-            
-            video.video.extra-small {
-                width: 80% !important;
-                max-width: 80% !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            video.video {
-                margin-top: 12px;
-                margin-bottom: 20px;
-                border-width: 4px;
-            }
-        }
-        
-        /* Gør video-kontroller meget større */
-        video::-webkit-media-controls-play-button,
-        video::-webkit-media-controls-pause-button {
-            transform: scale(3.0);
-        }
-        
-        video::-webkit-media-controls-timeline {
-            height: 30px;
-        }
-        
-        video::-webkit-media-controls-volume-slider {
-            height: 30px;
-        }
-        
-        video::-webkit-media-controls-mute-button {
-            transform: scale(2.5);
-        }
-        
-        /* Gør fuldskærm-knappen meget større */
-        video::-webkit-media-controls-fullscreen-button {
-            transform: scale(4.0);
-        }
-        .video-title {
-            margin-top: 40px;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, #ffffff 0%, #f5f9ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 600;
-            font-size: clamp(16px, 1.8vw, 18px);
-            filter: drop-shadow(0 1px 6px rgba(245, 249, 255, 0.3));
-        }
-        a.cta-link {
-            display: inline-block;
-            margin-top: 24px;
-            margin-bottom: 16px;
-            background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 26px;
+            padding: 14px 30px;
+            font-size: clamp(15px, 1.7vw, 18px);
             font-weight: 700;
-            font-size: clamp(12px, 1.5vw, 14px);
-            text-decoration: underline;
-            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.3));
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 999px;
+            border: 1px solid rgba(179, 217, 255, 0.5);
+            background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(142,201,255,0.24) 100%);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            box-shadow:
+                0 10px 30px rgba(4, 14, 26, 0.35),
+                0 0 24px rgba(142, 201, 255, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5),
+                inset 0 -8px 18px rgba(88, 152, 214, 0.22);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+            position: relative;
+            overflow: hidden;
             transition: all 0.3s ease;
         }
-        a.cta-link:visited { 
-            background: linear-gradient(135deg, #e6f3ff 0%, #b3d9ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        a.cta-link:hover {
-            background: linear-gradient(135deg, #ffffcc 0%, #ffeb99 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 2px 8px rgba(255, 235, 153, 0.4));
-            transform: translateY(-2px);
-        }
-        .section-title {
-            margin-top: 60px;
-            margin-bottom: 0;
-            background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #cce7ff 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            font-weight: 800;
-            font-size: clamp(16px, 2vw, 20px);
-            filter: drop-shadow(0 2px 10px rgba(204, 231, 255, 0.3));
-            border-bottom: 3px solid rgba(179, 217, 255, 0.6);
-            padding-bottom: 16px;
-            line-height: 1.2;
-            min-height: calc(1.2em + 16px + 3px);
-        }
-        .columns {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            grid-template-rows: auto auto;
-            gap: 0;
-            width: 100%;
-            max-width: 100%;
-            margin: 0 auto;
-            justify-content: center;
-            align-items: start;
-        }
-        
-        /* Sørg for at alle kategorier starter på samme position */
-        #Baggrundsviden,
-        #Dansk-som-andetsprog,
-        #Dansk-grammatik,
-        #Engelsk {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        /* Sørg for at alle titler har samme styling for alignment */
-        #Baggrundsviden .section-title,
-        #Dansk-som-andetsprog .section-title,
-        #Dansk-grammatik .section-title,
-        #Engelsk .section-title {
-            margin-top: 60px;
-            margin-bottom: 0;
-            padding-bottom: 16px;
-            line-height: 1.2;
-            min-height: calc(1.2em + 16px + 3px);
-            box-sizing: border-box;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
+        /* Teksten og ikonerne skal ligge oven på glans-laget */
+        .hero-cta > * {
             position: relative;
+            z-index: 1;
         }
-        
-        /* Sørg for at understregningen er på samme position */
-        #Baggrundsviden .section-title::after,
-        #Dansk-som-andetsprog .section-title::after,
-        #Dansk-grammatik .section-title::after,
-        #Engelsk .section-title::after {
-            content: '';
+        /* Blank overflade i den øverste halvdel, som på et glasknap */
+        .hero-cta::before {
+            content: "";
             position: absolute;
+            top: 1px;
+            left: 1px;
+            right: 1px;
+            height: 52%;
+            border-radius: 999px 999px 50% 50% / 999px 999px 90% 90%;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.1) 55%, rgba(255, 255, 255, 0) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* Lysstribe der glider hen over knappen med langt interval */
+        .hero-cta::after {
+            content: "";
+            position: absolute;
+            top: 0;
             bottom: 0;
+            left: -50%;
+            width: 42%;
+            background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
+            transform: skewX(-20deg);
+            animation: cta-shine 6s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .hero-cta:visited { color: #ffffff; }
+        .hero-cta:hover,
+        .hero-cta:focus-visible {
+            background: linear-gradient(135deg, rgba(255,255,255,0.26) 0%, rgba(142,201,255,0.38) 100%);
+            border-color: rgba(203, 231, 255, 0.95);
+            transform: translateY(-2px);
+            box-shadow:
+                0 14px 34px rgba(142, 201, 255, 0.3),
+                0 0 34px rgba(168, 214, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6),
+                inset 0 -8px 18px rgba(88, 152, 214, 0.24);
+        }
+        .hero-cta:active { transform: translateY(0); }
+        .hero-cta .cta-icon {
+            width: 17px;
+            height: 17px;
+            flex: 0 0 auto;
+            color: rgba(214, 235, 255, 0.95);
+        }
+        .hero-cta .cta-arrow {
+            width: 15px;
+            height: 15px;
+            flex: 0 0 auto;
+            opacity: 0.8;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .hero-cta:hover .cta-arrow,
+        .hero-cta:focus-visible .cta-arrow {
+            transform: translateX(3px);
+            opacity: 1;
+        }
+        @keyframes cta-shine {
+            0%        { left: -50%; }
+            35%, 100% { left: 130%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .hero-cta::after { animation: none; opacity: 0; }
+        }
+
+        .hero-tagline {
+            max-width: 620px;
+            margin: 16px auto 0;
+            color: rgba(230, 242, 255, 0.88);
+            font-size: clamp(14.5px, 1.5vw, 16.5px);
+            text-shadow: 0 1px 4px rgba(4, 12, 22, 0.85), 0 3px 14px rgba(4, 12, 22, 0.6);
+        }
+
+        /* ---------- Søgning ---------- */
+        .search {
+            position: relative;
+            max-width: 480px;
+            margin: 26px auto 0;
+            text-align: left;
+            z-index: 30;
+        }
+        .search-field {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 11px 18px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 12px 34px rgba(4, 14, 26, 0.38);
+        }
+        .search-field svg {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 auto;
+            color: #5b7590;
+        }
+        .search-field input {
+            flex: 1;
+            min-width: 0;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            font: inherit;
+            font-size: 15.5px;
+            color: #0d2035;
+        }
+        .search-field input::placeholder {
+            color: #7b8fa3;
+        }
+        .search-results {
+            display: none;
+            position: absolute;
+            top: calc(100% + 10px);
             left: 0;
             right: 0;
-            height: 3px;
-            background: rgba(179, 217, 255, 0.6);
+            max-height: 62vh;
+            overflow-y: auto;
+            padding: 6px;
+            background: #ffffff;
+            color: #0d2035;
+            border-radius: 16px;
+            box-shadow: 0 26px 60px rgba(3, 11, 20, 0.5);
         }
-        
-        /* Fjern border-bottom fra titlerne, da vi bruger ::after i stedet */
-        #Baggrundsviden .section-title,
-        #Dansk-som-andetsprog .section-title,
-        #Dansk-grammatik .section-title,
-        #Engelsk .section-title {
-            border-bottom: none;
+        .search-group {
+            padding: 8px 8px 12px;
         }
-        
-        .columns > div {
-            min-height: auto;
+        .search-group + .search-group {
+            border-top: 1px solid #e6eef8;
+        }
+        .search-group h3 {
+            margin: 0 0 4px;
+            padding: 0 10px;
+            font-size: 12px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #5b7590;
+        }
+        .search-results a {
+            display: block;
+            padding: 8px 10px;
+            border-radius: 10px;
+            color: #0d2035;
+            font-size: 15px;
+            text-decoration: none;
+        }
+        .search-results a:hover {
+            background: #eaf3ff;
+        }
+        .search-results .highlight {
+            padding: 0 2px;
+            border-radius: 4px;
+            background: #ffe9a3;
+            font-weight: 700;
+        }
+        .search-empty {
+            padding: 16px;
+            text-align: center;
+            color: #5b7590;
+            font-size: 15px;
+        }
+
+        /* ---------- Indhold ---------- */
+        main {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 30px 24px 90px;
+        }
+        .section + .section {
+            margin-top: 56px;
+        }
+        .section-head h2 {
+            margin: 0;
+            font-size: clamp(18px, 2vw, 22px);
+            font-weight: 800;
+        }
+        .section-head p {
+            margin: 4px 0 0;
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+        .section-head {
+            margin-bottom: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .card {
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            padding: 20px 22px 18px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            text-align: left;
         }
-        
-        /* Responsive design for different screen sizes */
-        @media (max-width: 1200px) {
-            .columns {
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-            }
-            
-            .wrap {
-                padding: 32px 24px;
-            }
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 0 8px;
+            font-size: clamp(16px, 1.7vw, 18.5px);
+            font-weight: 700;
         }
-        
-        @media (max-width: 900px) {
-            .columns {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            
-            .wrap {
-                padding: 24px 16px;
-            }
-            
-            h1 {
-                font-size: clamp(20px, 4vw, 24px);
-                margin-bottom: 24px;
-            }
-            
-            .subtitle {
-                font-size: clamp(14px, 3vw, 16px);
-                margin: 16px 0 60px 0;
-            }
+        .card-icon {
+            display: grid;
+            place-items: center;
+            width: 36px;
+            height: 36px;
+            flex: 0 0 auto;
+            border-radius: 11px;
+            background: rgba(142, 201, 255, 0.14);
+            border: 1px solid rgba(142, 201, 255, 0.24);
+            color: var(--accent);
         }
-        
-        @media (max-width: 600px) {
-            .columns {
-                grid-template-columns: 1fr;
-                gap: 30px;
+        .card-icon svg {
+            width: 19px;
+            height: 19px;
+        }
+        .card-note {
+            margin: 0 0 12px;
+            color: var(--text-muted);
+            font-size: 14.5px;
+            line-height: 1.45;
+        }
+
+        .link-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .link-list a {
+            display: block;
+            position: relative;
+            padding: 7px 0 7px 17px;
+            color: rgba(240, 247, 255, 0.94);
+            font-size: 15px;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        .link-list a::before {
+            content: "";
+            position: absolute;
+            left: 2px;
+            top: 15px;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: rgba(142, 201, 255, 0.65);
+            transition: background 0.2s ease;
+        }
+        .link-list a:hover,
+        .link-list a:focus-visible {
+            color: var(--accent-warm);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .link-list a:hover::before,
+        .link-list a:focus-visible::before {
+            background: var(--accent-warm);
+        }
+        .group-label {
+            margin: 16px 0 2px;
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: rgba(190, 216, 244, 0.75);
+        }
+
+        /* "Vis alle" i kortene */
+        .more {
+            margin-top: 12px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(168, 208, 255, 0.14);
+        }
+        .more > summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 5px 0;
+            cursor: pointer;
+            list-style: none;
+            color: var(--accent);
+            font-size: 14.5px;
+            font-weight: 700;
+            transition: color 0.2s ease;
+        }
+        .more > summary::-webkit-details-marker { display: none; }
+        .more > summary::marker { content: ""; }
+        .more > summary:hover { color: var(--accent-warm); }
+        .more .chev {
+            width: 13px;
+            height: 13px;
+            flex: 0 0 auto;
+            transition: transform 0.25s ease;
+        }
+        .more[open] .chev { transform: rotate(90deg); }
+        .lbl-less { display: none; }
+        .more[open] .lbl-more { display: none; }
+        .more[open] .lbl-less { display: inline; }
+
+        /* Udfoldelig hjælpetekst, fx "Log ind i AppWriter" */
+        .info-toggle {
+            margin: 6px 0 2px;
+        }
+        .info-toggle summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 6px 0 6px 0;
+            cursor: pointer;
+            list-style: none;
+            color: rgba(240, 247, 255, 0.94);
+            font-size: 15px;
+            transition: color 0.2s ease;
+        }
+        .info-toggle summary::-webkit-details-marker { display: none; }
+        .info-toggle summary::marker { content: ""; }
+        .info-toggle summary:hover { color: var(--accent-warm); }
+        .info-toggle .toggle-arrow {
+            width: 12px;
+            height: 12px;
+            flex: 0 0 auto;
+            color: var(--accent);
+            transition: transform 0.25s ease;
+        }
+        .info-toggle[open] .toggle-arrow { transform: rotate(90deg); }
+        .info-toggle .toggle-content {
+            margin: 6px 0 4px;
+            padding: 11px 14px;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            color: rgba(226, 240, 255, 0.9);
+            font-size: 14.5px;
+            line-height: 1.5;
+        }
+        .info-toggle .toggle-content a {
+            color: #ffffff;
+            font-weight: 700;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+        .info-toggle .toggle-content a:hover { color: var(--accent-warm); }
+        /* Udfoldelig tekst placeret som underpunkt i en linkliste */
+        .info-toggle-nested {
+            margin: 0 0 2px 17px;
+        }
+        .info-toggle-nested summary {
+            padding: 2px 0 6px;
+            font-size: 14.5px;
+            color: rgba(214, 232, 252, 0.86);
+        }
+
+        /* ---------- Responsivt ---------- */
+        @media (max-width: 1000px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 660px) {
+            body { font-size: 16px; }
+            .grid { grid-template-columns: 1fr; gap: 14px; }
+            .topbar { justify-content: center; padding: 14px 14px 0; }
+            .topbar-info { margin-right: 0; }
+            .topbar a { font-size: 13px; padding: 7px 12px; }
+            .hero {
+                min-height: 430px;
+                padding-bottom: 34px;
             }
             
-            .wrap {
-                padding: 20px 12px;
+            /* Smal skærm: flyt beskæringen mod venstre, så eleven bliver synlig */
+            .hero-bg::before {
+                background-position: 18% 50%;
             }
-            
-            h1 {
-                font-size: clamp(18px, 5vw, 22px);
-                margin-bottom: 20px;
-            }
-            
-            .subtitle {
-                font-size: clamp(13px, 4vw, 15px);
-                margin: 12px 0 40px 0;
-            }
-            
-            .section-title {
-                font-size: clamp(14px, 4vw, 18px);
-                margin-top: 40px;
-                margin-bottom: 24px;
-            }
+            .hero-inner { padding: 10px 18px 0; }
+            main { padding: 24px 16px 70px; }
+            .section + .section { margin-top: 42px; }
+            .hero-cta { padding: 13px 24px; }
         }
     </style>
 </head>
 <body>
 
-    <a href="for-laesevejledere.html" class="for-læsevejledere">For læsevejledere</a>
-    <a href="https://techmieriber-sketch.github.io/Underviserens-guide/" class="for-undervisere" target="_blank" rel="noopener">For undervisere</a>
-    <a href="#Dansk-som-andetsprog" class="for-dansk-som-andetsprog">Dansk som andetsprog</a>
-    
-    
-    <div class="wrap">
-        <h1>Læsevejlederen</h1>
-        <h2 class="subtitle">Hjælp til selvhjælp</h2>
-        <div class="search-container">
-            <input type="text" id="search-input" class="search-input" placeholder="Søg efter emner...">
-            <div id="search-results" class="search-results"></div>
-        </div>
-        <div class="columns">
-            <div style="grid-column: 1 / -1; text-align: center; margin-bottom: 15px; padding: 0;">
-                <p style="color: #ffffff; font-size: clamp(12px, 1.5vw, 16px); margin: 0 0 12px 0; text-shadow: 0 2px 6px rgba(0,0,0,0.4); line-height: 1.5;">
-                    Log ind i AppWriter ved at vælge ’Unilogin’ og herefter ’MitID’.
-                </p>
-                <p style="color: #ffffff; font-size: clamp(12px, 1.5vw, 16px); margin: 0; text-shadow: 0 2px 6px rgba(0,0,0,0.4); line-height: 1.5;">
-                    På ordlab.dk skal du logge ind i øverste højre hjørne. Vælg Uni-login, og herefter MitID. Gå tilbage til siden her, og klik på linket igen.
-                </p>
+    <!-- Hvidbalance til topfotoet: dæmper den blå kanal og løfter den røde, så hudfarven bliver naturlig -->
+    <svg class="filter-defs" aria-hidden="true" focusable="false">
+        <filter id="hvidbalance" color-interpolation-filters="sRGB">
+            <feColorMatrix type="matrix" values="1.10 0 0 0 0
+                                                 0 1.01 0 0 0
+                                                 0 0 0.86 0 0
+                                                 0 0 0 1 0" />
+        </filter>
+    </svg>
+
+    <div class="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+
+        <nav class="topbar">
+            <details class="topbar-info">
+                <summary>
+                    <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 5l7 7-7 7"/>
+                    </svg>
+                    Om Ordlab.dk
+                </summary>
+                <div class="topbar-info-panel"><a href="https://ordlab.dk/start/" target="_blank" rel="noopener">Ordlab.dk</a> er et stort videobibliotek med korte instruktionsvideoer der guider dig i brugen af læse- og skriveteknologier. På ordlab.dk skal du logge ind i øverste højre hjørne. Vælg Uni-login, og herefter MitID.</div>
+            </details>
+
+            <a href="#Dansk-som-andetsprog">Dansk som andetsprog</a>
+            <a href="for-laesevejledere.html">For læsevejledere</a>
+            <a href="https://techmieriber-sketch.github.io/Underviserens-guide/" target="_blank" rel="noopener">For undervisere</a>
+        </nav>
+
+        <div class="hero-inner">
+            <h1>Læsevejlederen</h1>
+
+            <a href="https://ai.aarhustech.dk/" class="hero-cta" target="_blank" rel="noopener">
+                <svg class="cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2.5l1.9 4.7 4.7 1.9-4.7 1.9L12 15.7l-1.9-4.7-4.7-1.9 4.7-1.9L12 2.5z"/>
+                    <path d="M18.5 14.5l.95 2.35 2.35.95-2.35.95-.95 2.35-.95-2.35-2.35-.95 2.35-.95.95-2.35z" opacity="0.85"/>
+                    <path d="M5.5 15l.75 1.85L8.1 17.6l-1.85.75L5.5 20.2l-.75-1.85L2.9 17.6l1.85-.75L5.5 15z" opacity="0.7"/>
+                </svg>
+                <span>Prøv den digitale læsevejleder</span>
+                <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M5 12h13M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+
+            <p class="hero-tagline">Få hjælp til læsning, skrivning, svære tekster, fagbegreber og digitale læse- og skriveværktøjer</p>
+
+            <div class="search">
+                <div class="search-field">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="M20 20l-3.6-3.6"/>
+                    </svg>
+                    <input type="text" id="search-input" placeholder="Søg efter hjælp, fx oplæsning eller komma" autocomplete="off">
+                </div>
+                <div id="search-results" class="search-results" role="region" aria-live="polite"></div>
             </div>
-            <div id="IT-værktøjer" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,217,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,217,255,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #b3d9ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">AppWriter</h2>
-                <p>
-                    <a class="cta-link" href="https://youtu.be/aCQG1ovE7HA" target="_blank" rel="noopener">Introduktion til AppWriter</a>
-                </p>
-
-                <p>
-                    <a class="cta-link" href="https://it-info.aarhustech.dk/da/software/generelt/appwriter" target="_blank" rel="noopener">Hent AppWriter</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://chromewebstore.google.com/detail/appwriter-cloud/lokadhdaghfjbmailhhenifjejpokche?hl=da&pli=1" target="_blank" rel="noopener">Hent AppWriter Cloud</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://microsoftedge.microsoft.com/addons/detail/appwriter-cloud/ejkmeinadgefifnopiacgpjlkjdjhhkc?hl=en-GB#:~:text=AppWriter%20is%20able%20to%20convert%20your%20speech%20to,in%20any%20PDF%20e.g.%20homework%2C%20e-books%2C%20and%20forms." target="_blank" rel="noopener">AppWriter Edge Add-on</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://read.bookcreator.com/FgsSBIzPCYh4cEp31F7jauQf0MN2/RsXnoGmIRpyRABb_Elyz5A/K-NJsNGySFGO0nbrjQodLw" target="_blank" rel="noopener">AppWriter ebog</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=20&aid%5B%5D=62" target="_blank" rel="noopener">Windows</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/hjaelpemiddel/appwriter-cloud/?myFilters" target="_blank" rel="noopener">Chromebook</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=21&aid%5B%5D=62" target="_blank" rel="noopener">Macbook</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?share=Orbit!%!Note!%!%!8071,8055,8042,8037" target="_blank" rel="noopener">Orbit Note</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=22&aid%5B%5D=62" target="_blank" rel="noopener">Android</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=23&aid%5B%5D=62" target="_blank" rel="noopener">iPhone og iPad</a>
-                </p>
-            </div>
-
-            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,179,217,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,179,217,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6f3 50%, #ffb3d9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Intowords</h2>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=20&aid%5B%5D=64" target="_blank" rel="noopener">Windows</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=24&aid%5B%5D=64" target="_blank" rel="noopener">Chromebook</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?platform%5B%5D=21&aid%5B%5D=64" target="_blank" rel="noopener">Macbook</a>
-                </p>
-                <h3 class="section-title">Intowords-træneren</h3>
-                <p>
-                    <a class="cta-link" href="https://vimeo.com/744562499/065d453bdd" target="_blank" rel="noopener">lydret stavning</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://vimeo.com/744561692/70a1c698b8" target="_blank" rel="noopener">Jokertegn</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://vimeo.com/744561444/469e14a3b1?turnstile=0.yWnD26pMbVpSzKDTHBdCx7taNKP3eiIqK0pmoZI7HV4siAYNWX0aNG7xCF8WqLIekO3fgWrnMKWIXfBwhUjJ-hpRKIbAdBY4IktEl11KWcT0I11Xaui-7fijTuQ_tS1wQliSW91dxcRaydBHCq5RzEhlr5KlPUDRymjFJw3Z7ndRW93Dj-p8LnCX6PAC3BKjtDP8rcQ25bNzRP2sNl2M14iEqslEjwBrypQHli35BqPN4uF822a50ro09kOWjnUF2eJQaQBS28oK0wYUhbRYc3JbNYWowzZ4ao_Nm93QvA6aEuPy9m1c7uJzXwDjSG5TTYAeTPPnbg72OrKc4N5rYraPhLTwLsemm6eZlmQvwciM7VXTo_W2xkRzqluke5zGb_4bm1F2hc0donr0lKxX7lNUrumNv8DoM4OiiJktvKT9tKMCPW5Uy0UUDaopizQRpbvbDc-QTj2afDA0D3tuVTF0c9TMPXBb7gfGnpPtR0Ex-vIQTlb1XssFQXSnx4VmH-MhSbU8SeTSAGiJXh01wBLAfwuCyxcgR0c5BLg7HHGC3dRxo32w6wm1VEvjqHCucZLkCqUuiq-ch7xV2c1rFASk-UI-sphQ9b1HLtOhNYmQokvrZNsGAMPGS7mkNdzd7Loj1mGYBn2qL4S2S8A40jQ9mA1Fn4IEz7KIL66aIFpYr5ArQKsCxf8OK3rtv8Mgj1QxWwc0j1dD--ZMRSrGJrccTvrPKMkUJv54xAVnwQ8WLPPC4W5inzfRHPFL_v-3ZO9b8fw8EqSMUJ0ZH3i3hza4KTo5ooTPy-gru0pU0e_sBQiyvk84_4wgM3kJOaKBMSzL6GKfuu1pUAQEdVeHZ6Y-e3wo9qlja_ZlTn7zkgkohrix5Yf4IQQnhPqlNb793QRMk2ufA_FrrjS1GErqdA.LHCIsoyFHqW9_xkJqMMeEg.661b99adcbdd41909ef3576fdf0671d6b50f504739ef61009d42abef8008419a" target="_blank" rel="noopener">Fagord</a>
-                </p>
-            </div>
-
-            <div style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
-                <h2 class="section-title" style="white-space: nowrap; background: linear-gradient(135deg, #ffffff 0%, #fff2e6 50%, #ffd9b3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Google Lens</h2>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/video/google-lens-tekstoplaesning/" target="_blank" rel="noopener">Tekstoplæsning</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/video/google-lens-gennemgang-af-funktioner/" target="_blank" rel="noopener">Gennemgang af funktioner</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/video/peter-goer-deltagelse-muligt-for-alle-i-vaerkstedet/" target="_blank" rel="noopener">Deltagelse for alle i værkstedet</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/video/faa-hjaelp-til-at-udvikle-dit-fagsprog-med-en-app/" target="_blank" rel="noopener">Hjælp til at udvikle fagsprog</a>
-                </p>
-            </div>
-
-            <div id="Læseforståelse" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,255,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,255,179,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6ffe6 50%, #b3ffd9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Læsning</h2>
-                <p>
-                    <a class="cta-link" href="https://selvtest.nu/" target="_blank" rel="noopener">Test din læsning</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://techmieriber-sketch.github.io/Laeseflow/" target="_blank" rel="noopener">Læsehastighed med læseflow</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1sQ8UU-8x9_iZqeEqkhDzOxxYsEBVkRWS?usp=sharing" target="_blank" rel="noopener">Læseflow som browserudvidelse</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://m365.cloud.microsoft.com/chat/?titleId=T_611d71e5-9f86-b714-c54a-dbb0c755d0b9" target="_blank" rel="noopener">Læseforståelse med Copilot</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://chatgpt.com/g/g-68a344817af08191a37a997523aba125-laeseforstaelse" target="_blank" rel="noopener">Læseforståelse med ChatGPT</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="Grundprompt-til-tekstforstaaelse.pdf" target="_blank" rel="noopener">Grundprompt til tekstforståelse</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://notebooklm.google.com/" target="_blank" rel="noopener">Notebook LM</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://www.ilovepdf.com/" target="_blank" rel="noopener">Ilovepdf</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://youtu.be/2KQiITCtX8Y" target="_blank" rel="noopener">Oplæsning med Edge-browseren</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="Lærervejledning til Tekstanalyse med Copilot og ChatGPT.pdf" target="_blank" rel="noopener">Lærervejledning til Tekstanalyse med Copilot og ChatGPT</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://m365.cloud.microsoft/chat/?titleId=T_64dbaf73-900b-343b-dd03-dea1dd535d94" target="_blank" rel="noopener">Tekstanalyse med Copilot</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://chatgpt.com/g/g-68c28a412bf48191a35367058a743be4-tekstanalyse" target="_blank" rel="noopener">Tekstanalyse med ChatGPT</a>
-                </p>
-                <h3 class="section-title">Analyse-<br>modeller til</h3>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Noveller</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Artikler</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Reklamer</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Debatindlæg</a>
-                </p>
-
-            </div>
-
-            <div id="Skrivehjælp" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,179,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,179,255,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6ff 50%, #ffb3ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Skrivehjælp</h2>
-                <p>
-                    <a class="cta-link" href="https://m365.cloud.microsoft.com/chat/?titleId=T_28c1653f-107f-84c4-511f-c221664dd09f" target="_blank" rel="noopener">Korrektur med Copilot</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://chatgpt.com/g/g-68b46da6d59c8191b4d23d3bfbd624a8-ret-tekst" target="_blank" rel="noopener">Korrektur med ChatGPT</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://m365.cloud.microsoft/chat/?titleId=T_11dc9572-f6cd-09dd-1bc5-ab0050f08ac7" target="_blank" rel="noopener">Forstå din opgave med Copilot</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://chatgpt.com/g/g-68c14bfa205c81919eeeea242b0412ac-forsta-din-opgave" target="_blank" rel="noopener">Forstå din opgave med ChatGPT</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1WfB3x6a-eV5GEbo9pc_ERHtAP1_iAIuN?usp=sharing" target="_blank" rel="noopener">Skriveskabelon til notater</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://m365.cloud.microsoft/chat/?titleId=T_f5006552-f1ba-60f3-c44a-cc18c22d0b17" target="_blank" rel="noopener">Få styr på dine notater med Copilot</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://chatgpt.com/g/g-68c15251e6e08191bc074fdf6bafa772-notat-assistenten" target="_blank" rel="noopener">Få styr på dine notater med ChatGPT</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://skrivsikkert.dk/" target="_blank" rel="noopener">Skrivsikkert</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?share=Skriv!%!sikkert!%!%!9722,9725,9746,9761,9766,9751,8260" target="_blank" rel="noopener">Hjælp til Skrivsikkert</a>
-                </p>
-                <h3 class="section-title">Skrive-<br>skabeloner<br>til</h3>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Læserbrev Skriveskabelon</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Instruktion Skriveskabelon</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Debatindlæg Skriveskabelon</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Fagtekst<br>Skriveskabelon</a>
-                </p>
-                <p style="color: #ffffff; margin-left: 0;">
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Fortælling Skriveskabelon</a>
-                </p>
-            </div>
-
-            <div id="Nota" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,217,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,217,255,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6f3ff 50%, #b3d9ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Nota</h2>
-                <p>
-                    <a class="cta-link" href="https://nota.dk/bibliotek/notalogin#nemlog-in" target="_blank" rel="noopener">Link til Nota -<br>Log ind med dit MitID</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://youtu.be/G03H0yxigXc?si=XG2xL2qaxqYwnq_l" target="_blank" rel="noopener">Lydbøger på Nota</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://ordlab.dk/alle-videoer/?share=Nota!%!%!9735,9816,9731,7360,6081,6027,6018,6011,6006,6001,1521,1518,1515,1509,1506,1499,1494" target="_blank" rel="noopener">Hjælp til Nota</a>
-                </p>
-                <p><a href="https://www.youtube.com/watch?v=blyTZLL_xHY" target="_blank" rel="noopener" class="cta-link">Download skolebog fra Nota og få den læst højt med AW</a></p>
-                <p>
-                    <a class="cta-link" href="https://nota.dk/viden/videoguides-til-brug-af-l%C3%A5ste-studieb%C3%B8ger" target="_blank" rel="noopener">Videoguides til brug af låste studiebøger</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://nota.dk/bibliotek/hjaelp/notaapp" target="_blank" rel="noopener">Nota app</a>
-                </p>
-            </div>
-
-            <div id="Baggrundsviden" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(179,255,217,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(179,255,217,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #e6ffe6 50%, #b3ffd9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Baggrundsviden</h2>
-                <p>
-                    <a class="cta-link" href="https://youtu.be/xLAJxrBgsdg?si=6l6mtPTfwPqtCAX0" target="_blank" rel="noopener">Den ordblinde hjerne</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://youtu.be/86giFyrNesw?si=1vZliafMOk3X9sh-" target="_blank" rel="noopener">Hvordan opleves ordblindhed?</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://www.ordblindeforeningen.dk/" target="_blank" rel="noopener">Ordblindeforeningen</a>
-                </p>
-
-            </div>
-
-            <div id="Visuel-ordblindhed" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(200,179,255,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(200,179,255,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ede6ff 50%, #c8b3ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Visuel ordblindhed</h2>
-                <p>
-                    <a class="cta-link" href="https://lexilens.dk/" target="_blank" rel="noopener">Sådan opleves visuelle læseudfordringer</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://techmieriber-sketch.github.io/Laesefilter/" target="_blank" rel="noopener">Læsefilter</a>
-                </p>
-                <p>
-                    <a class="cta-link" href="https://drive.google.com/drive/folders/1YgsDodYVOIrDOiHKYSH0ky-sWkEHZARg?usp=sharing" target="_blank" rel="noopener">Læsefilter som browserudvidelse</a>
-                </p>
-            </div>
-
-            <div id="Dansk-som-andetsprog" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6e6 50%, #ffd9b3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dansk som andetsprog</h2>
-                <p><a href="https://ordlab.dk/alle-videoer/?share=Bedre!%!dansk!%!(Gratis)!%!%!3751,3765" target="_blank" rel="noopener" class="cta-link">Bedre dansk (Gratis)</a></p>
-                <p><a href="https://ordlab.dk/alle-videoer/?share=Bedre!%!dansk!%!(Premium)!%!%!3754,3760,3763,3757" target="_blank" rel="noopener" class="cta-link">Bedre dansk (Premium)</a></p>
-                <p><a href="https://drive.google.com/drive/folders/1cUmiCmQzDshnFyYLvbC4thB_P5lyc0HM?usp=sharing" target="_blank" rel="noopener" class="cta-link">Sprogmakker</a></p>
-                <p><a href="https://www.youtube.com/watch?v=MFvDGZVD3Qw&list=PLk6g9tySafarm-24K2ztZRXHhjkG9R2LC" target="_blank" rel="noopener" class="cta-link">Sådan siger man</a></p>
-                <p><a href="https://www.youtube.com/watch?v=Ik_0DJu_dP8&list=PLk6g9tySafaqdGAp4lufNQU9o-b-C0CPG" target="_blank" rel="noopener" class="cta-link">Danish Vowels</a></p>
-                <p><a href="https://www.youtube.com/watch?v=0vaSpM3LenM&list=PLk6g9tySafapSyrz09XR_5swfBYrwLYrg" target="_blank" rel="noopener" class="cta-link">Danske vokaler</a></p>
-                <p><a href="https://www.youtube.com/watch?v=BHPKB9sBJT8&list=PLk6g9tySafaqjJJaz9OTTHoTFJjFN7dLo" target="_blank" rel="noopener" class="cta-link">Danish Pronunciation for beginners</a></p>
-                <p><a href="https://www.youtube.com/watch?v=WiHkOa55ZZI&list=PLk6g9tySafar_Zbj-93nFFzW4GnKsjM1c" target="_blank" rel="noopener" class="cta-link">Danske dialoger</a></p>
-                <p><a href="https://www.youtube.com/watch?v=W9YgPXDtDV0&list=PLk6g9tySafapZcYjKW0lffiCJBiOWg3lX" target="_blank" rel="noopener" class="cta-link">Dansk udtale for lidt øvede</a></p>
-                <p><a href="https://www.youtube.com/watch?v=sh9arggYnrY&list=PLk6g9tySafaoeb8kXu9KBAjagCxCymcWY" target="_blank" rel="noopener" class="cta-link">Dansk udtale for øvede</a></p>
-                <p><a class="cta-link" href="https://www.youtube.com/watch?v=W9YgPXDtDV0&list=PLk6g9tySafaqKlQ0uFD2uGikcZ4SbG2Vf" target="_blank" rel="noopener">Danske konsonanter</a></p>
-                <p><a class="cta-link" href="https://www.youtube.com/watch?v=OXkDp4uA2aA&list=PLzQVrtlP5LA4oTQxygqdygvw8lxy58wDs" target="_blank" rel="noopener">Dansk sprog, grammatik og udtale</a></p>
-            </div>
-
-            <div id="Dansk-grammatik" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6e6 50%, #ffd9b3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Dansk grammatik</h2>
-                <p><a href="https://youtu.be/6xCGhXug9V0?si=Qda-hL_WusaorVQT" target="_blank" rel="noopener" class="cta-link">Verber: Nutids-r eller navneform?</a></p>
-                <p><a href="https://youtu.be/VWOvWcvLU98?si=2kge6oXZYcOam6rw" target="_blank" rel="noopener" class="cta-link">Ene/ende</a></p>
-                <p><a href="https://youtu.be/fWTHKk-s548?si=byEiDqokB_b8JbQF" target="_blank" rel="noopener" class="cta-link">Verbernes form: -t eller -ede i kort tillægsform</a></p>
-                <p><a href="https://youtu.be/M1nABMwHeik?si=_dxW_cQ6kc7r7q1q" target="_blank" rel="noopener" class="cta-link">Substantiver: r-problemer med navneord i flertal</a></p>
-                <p><a href="https://youtu.be/iuhk3y9GV5k?si=WVl_PxZv9Elbb7Zk" target="_blank" rel="noopener" class="cta-link">Genitiv: Apostrof eller ej ved ejefald?</a></p>
-                <p><a href="https://youtu.be/RLjIOJHzCAo?si=eYyaH0R_CRLIz7qF" target="_blank" rel="noopener" class="cta-link">Adverbier: Biord med eller uden -t</a></p>
-                <p><a href="https://youtu.be/ptjTAxh8gvI?si=OzIBUdFaxZolJvTF" target="_blank" rel="noopener" class="cta-link">Ordforveksling: for eller får?</a></p>
-                <p><a href="https://youtu.be/cSUX7J0mlbI?si=gmxlX3N9O6CNX_cI" target="_blank" rel="noopener" class="cta-link">Ordforveksling: ad eller af?</a></p>
-                <p><a href="https://youtu.be/-u5LkXD3GaA?si=dRPMiHRsUyafe1uy" target="_blank" rel="noopener" class="cta-link">Ordforveksling: at eller og?</a></p>
-                <p><a href="https://youtu.be/tK8bm8gM8Qw?si=g9cxjUdIAhYmDdqr" target="_blank" rel="noopener" class="cta-link">Ordforveksling: hans, hendes eller sin?</a></p>
-                <p><a href="https://youtu.be/FsBuYDxA5BQ?si=smRp8Vq4evDQp56j" target="_blank" rel="noopener" class="cta-link">Ordforveksling: ligge eller lægge?</a></p>
-                <p><a href="https://youtu.be/GdUA-pSQv8Q?si=d1h4yVzo3hWCttha" target="_blank" rel="noopener" class="cta-link">Ordforveksling: nogen eller nogle?</a></p>
-                <p><a href="https://youtu.be/kAUGGk_2BqY?si=kr3wRZj8RqYFFcBo" target="_blank" rel="noopener" class="cta-link">Ordforveksling: synes eller syntes?</a></p>
-                <p><a href="https://youtu.be/mrpcyFIbHNE?si=KdJfXunfmATfFjxF" target="_blank" rel="noopener" class="cta-link">Sammensatte ord</a></p>
-                <p><a href="https://youtu.be/m1bVudZOIXE?si=NYdrnUId_qGeVfhR" target="_blank" rel="noopener" class="cta-link">De 7 kommaregler</a></p>
-                <p><a href="https://youtu.be/PojaXwWfuoQ?si=0fsmBq8dNhLSjdbP" target="_blank" rel="noopener" class="cta-link">De 7 gyldne kommaregler</a></p>
-                <p><a href="https://youtu.be/el8RTUh7TO8?si=evUbt9UD-Is4OQLt" target="_blank" rel="noopener" class="cta-link">Kommaregler</a></p>
-            </div>
-
-            <div id="Engelsk" style="background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,217,179,0.08) 100%); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,217,179,0.2);">
-                <h2 class="section-title" style="background: linear-gradient(135deg, #ffffff 0%, #ffe6e6 50%, #ffd9b3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Engelsk</h2>
-                <p><a href="https://chatgpt.com/g/g-68cd32c663808191bbf9e059118557ff-sprogpartner-engelsk-som-andetsprog" target="_blank" rel="noopener" class="cta-link">Sprogpartner - ChatGPT</a></p>
-                <p><a href="https://m365.cloud.microsoft:443/chat/?titleId=T_c245d6f2-fce8-4b89-ad29-15b2c4112f63&source=embedded-builder" target="_blank" rel="noopener" class="cta-link">Sprogpartner - Copilot</a></p>
-                <h3 class="section-title">Engelsk grammatik</h3>
-                <p><a href="https://youtu.be/-20UUtdWRDk?si=dGVFByz0CXjnRy9v" target="_blank" rel="noopener" class="cta-link">Hvad er kongruens?</a></p>
-                <p><a href="https://youtu.be/9nkyxQcekLk?si=UesAkuN1kPOMbRYx" target="_blank" rel="noopener" class="cta-link">Kongruens: 'There' som foreløbigt grundled</a></p>
-                <p><a href="https://youtu.be/gVKNeDu7VBQ?si=wBgV47gOKdRYKjJg" target="_blank" rel="noopener" class="cta-link">Kongruens: Dobbeltbøjning af udsagnsled (fejltype)</a></p>
-                <p><a href="https://youtu.be/kQ3fGI7wK8U?si=6kIsj7WRmYgRdO_L" target="_blank" rel="noopener" class="cta-link">Kongruens: Sammentrækning med BE, DO og negationen NOT</a></p>
-                <p><a href="https://youtu.be/A5OponoluXc?si=e3itPvQXUGsRoviR" target="_blank" rel="noopener" class="cta-link">Verbernes form: Udsagnsord i førnutid</a></p>
-                <p><a href="https://youtu.be/Z-GqIu9WnM0?si=gw2vU5sE1r-kstTR" target="_blank" rel="noopener" class="cta-link">Verbernes form: Udsagnsord i udvidet tid</a></p>
-                <p><a href="https://youtu.be/wDv-xHscAzg?si=nMakdOp9xGnoxJmt" target="_blank" rel="noopener" class="cta-link">Verbernes form: Lang tillægsform efter forholdsord</a></p>
-                <p><a href="https://youtu.be/GV08z_nWWBs?si=xjZHJJtHGgvk3swE" target="_blank" rel="noopener" class="cta-link">Verbernes tid: Tidsspring i udsagnsord (fejltype)</a></p>
-                <p><a href="https://youtu.be/TY0Maj0QAoA?si=eZ7lW_w716MdXugo" target="_blank" rel="noopener" class="cta-link">Hjælpeudsagnsordet 'do'</a></p>
-                <p><a href="https://youtu.be/u88zK-pd7jo?si=5xrlqg13iNROTWfi" target="_blank" rel="noopener" class="cta-link">Præpositioner: Forholdsordene AT, IN og ON</a></p>
-                <p><a href="https://youtu.be/ekvcgqsLDYg?si=znrRsG7nZsxkyIc_" target="_blank" rel="noopener" class="cta-link">Substantiver: Navneord med endelsen -f(e)</a></p>
-                <p><a href="https://youtu.be/awGByQU8fHM?si=uPdB9XhY_r37jQF7" target="_blank" rel="noopener" class="cta-link">Artikler: Bestemt og ubestemt kendeord</a></p>
-                <p><a href="https://youtu.be/P-hRJZTKnV4?si=HOerKUp0KNPDJMet" target="_blank" rel="noopener" class="cta-link">Artikler: 4 specifikke eksempler med kendeord</a></p>
-                <p><a href="https://youtu.be/qCiw3UyU12o?si=gxH2UldBsMd_pvCe" target="_blank" rel="noopener" class="cta-link">Genitiv: Hvordan danner man ejefald?</a></p>
-                <p><a href="https://youtu.be/ga6jy3B9X1s?si=xjr31VfNUkIdA80F" target="_blank" rel="noopener" class="cta-link">Pronominer: Påpegende stedord</a></p>
-                <p><a href="https://youtu.be/4igaFnxF9VI?si=AV13Do1JEerKc6ey" target="_blank" rel="noopener" class="cta-link">Pronominer: Henførende stedord</a></p>
-                <p><a href="https://youtu.be/z-s03uvlVoo?si=6Qkt9zRdPrYULg3p" target="_blank" rel="noopener" class="cta-link">Pronominer: Tilbageførende stedord</a></p>
-                <p><a href="https://youtu.be/6g7Mbo4RwcY?si=W9WAHKfvUrPNgaEy" target="_blank" rel="noopener" class="cta-link">Adjektiver: Tillægsord med 1 stavelse</a></p>
-                <p><a href="https://youtu.be/6g7Mbo4RwcY?si=7X79NR4HmSChDjzY" target="_blank" rel="noopener" class="cta-link">Adjektiver: Tillægsord med 2 stavelser</a></p>
-                <p><a href="https://youtu.be/KOWtkkIQtzI?si=iD856nBB3uQdThuc" target="_blank" rel="noopener" class="cta-link">Adjektiver: Tillægsord med 3+ stavelser</a></p>
-                <p><a href="https://youtu.be/ddTX37eZXnY?si=k_6zvj_WAjvmoHJr" target="_blank" rel="noopener" class="cta-link">Adjektiver: Dobbelt gradbøjning af tillægsord (fejltype)</a></p>
-                <p><a href="https://youtu.be/8P2z67Ds_0Q?si=LSrIiB4TnebTZWj7" target="_blank" rel="noopener" class="cta-link">Adjektiver: Uregelmæssige tillægsord</a></p>
-                <p><a href="https://youtu.be/ZV9qbCWvzts?si=j7tO9H-ASSnxetfm" target="_blank" rel="noopener" class="cta-link">Adjektiver: Tillægsord må ikke stå alene</a></p>
-                <p><a href="https://youtu.be/BAWu24WHmIY?si=nN6E57WCqSN5yOyU" target="_blank" rel="noopener" class="cta-link">Adverbier: Grads- og hyppighedsbiord</a></p>
-                <p><a href="https://youtu.be/0hr1jnhUVYA?si=Wnwc1outE-1-CFT8" target="_blank" rel="noopener" class="cta-link">Adverbier: Tids-, steds- og mådesbiord</a></p>
-                <p><a href="https://youtu.be/Q8kIvT6-5mE?si=k52oTrEnSTFnpPWw" target="_blank" rel="noopener" class="cta-link">Ordstilling: Lange biordsled</a></p>
-                <p><a href="https://youtu.be/yEsof43846A?si=LGlRwwokeSuA5a20" target="_blank" rel="noopener" class="cta-link">Ordstilling: to BE og grundleddet</a></p>
-                <p><a href="https://youtu.be/PE4R8jP9cKY?si=ABa2cjgIV1pIAT1D" target="_blank" rel="noopener" class="cta-link">Ordstilling: to BE og grundleddet</a></p>
-            </div>
-
-
         </div>
     </div>
-    
+
+    <main>
+
+        <section class="section">
+            <div class="grid">
+
+                <article class="card" id="AppWriter">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M11 5L6 9H3v6h3l5 4V5z"/>
+                                <path d="M15.5 8.5a5 5 0 010 7"/>
+                                <path d="M18.5 5.5a9 9 0 010 13"/>
+                            </svg>
+                        </span>
+                        AppWriter
+                    </h3>
+                    <p class="card-note">Læser tekst højt for dig og hjælper dig med at stave, mens du skriver.</p>
+                    <ul class="link-list">
+                        <li><a href="https://youtu.be/aCQG1ovE7HA" target="_blank" rel="noopener">Introduktion til AppWriter</a></li>
+                        <li><a href="https://it-info.aarhustech.dk/da/software/generelt/appwriter" target="_blank" rel="noopener">Hent AppWriter</a></li>
+                        <li>
+                            <details class="info-toggle info-toggle-nested">
+                                <summary>
+                                    <svg class="toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    Log ind i AppWriter
+                                </summary>
+                                <p class="toggle-content">Du logger ind i AppWriter ved at vælge ’Unilogin’ og herefter ’MitID’</p>
+                            </details>
+                        </li>
+                        <li><a href="https://chromewebstore.google.com/detail/appwriter-cloud/lokadhdaghfjbmailhhenifjejpokche?hl=da&pli=1" target="_blank" rel="noopener">Hent AppWriter Cloud</a></li>
+                        <li><a href="https://microsoftedge.microsoft.com/addons/detail/appwriter-cloud/ejkmeinadgefifnopiacgpjlkjdjhhkc?hl=en-GB#:~:text=AppWriter%20is%20able%20to%20convert%20your%20speech%20to,in%20any%20PDF%20e.g.%20homework%2C%20e-books%2C%20and%20forms." target="_blank" rel="noopener">AppWriter Edge Add-on</a></li>
+                        <li><a href="https://www.youtube.com/watch?v=WJUn89vx0vM" target="_blank" rel="noopener">Jokertegn</a></li>
+                    </ul>
+                </article>
+
+                <article class="card" id="Intowords">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 7V5h16v2"/>
+                                <path d="M12 5v14"/>
+                                <path d="M9 19h6"/>
+                            </svg>
+                        </span>
+                        Intowords
+                    </h3>
+                    <p class="card-note">Oplæsning, ordforslag og fagordlister på computer, tablet og telefon.</p>
+                    <ul class="link-list">
+                        <li><a href="https://vimeo.com/1213482151" target="_blank" rel="noopener">Stave- og skrivehjælp</a></li>
+                        <li><a href="https://i.vimeocdn.com/video/2184158517-a71ea02e8e8f38f91345ee06845e2b60554cec231315c0e89b8e4c80fe5c7ad5-d_640?region=us" target="_blank" rel="noopener">Profiler og fagordslister</a></li>
+                        <li><a href="https://vimeo.com/1213481677" target="_blank" rel="noopener">Oplæsning og billedlæser</a></li>
+                        <li><a href="https://vimeo.com/1208093473" target="_blank" rel="noopener">Egen fagordsliste</a></li>
+                        <li><a href="https://vimeo.com/1208341641" target="_blank" rel="noopener">PDF og OCR</a></li>
+                        <li><a href="https://vimeo.com/1208396262" target="_blank" rel="noopener">Lydfil</a></li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Intowords-træneren (3)</span>
+                            <span class="lbl-less">Skjul Intowords-træneren</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://vimeo.com/744562499/065d453bdd" target="_blank" rel="noopener">Lydret stavning</a></li>
+                            <li><a href="https://vimeo.com/744561692/70a1c698b8" target="_blank" rel="noopener">Jokertegn</a></li>
+                            <li><a href="https://vimeo.com/744561444/469e14a3b1?turnstile=0.yWnD26pMbVpSzKDTHBdCx7taNKP3eiIqK0pmoZI7HV4siAYNWX0aNG7xCF8WqLIekO3fgWrnMKWIXfBwhUjJ-hpRKIbAdBY4IktEl11KWcT0I11Xaui-7fijTuQ_tS1wQliSW91dxcRaydBHCq5RzEhlr5KlPUDRymjFJw3Z7ndRW93Dj-p8LnCX6PAC3BKjtDP8rcQ25bNzRP2sNl2M14iEqslEjwBrypQHli35BqPN4uF822a50ro09kOWjnUF2eJQaQBS28oK0wYUhbRYc3JbNYWowzZ4ao_Nm93QvA6aEuPy9m1c7uJzXwDjSG5TTYAeTPPnbg72OrKc4N5rYraPhLTwLsemm6eZlmQvwciM7VXTo_W2xkRzqluke5zGb_4bm1F2hc0donr0lKxX7lNUrumNv8DoM4OiiJktvKT9tKMCPW5Uy0UUDaopizQRpbvbDc-QTj2afDA0D3tuVTF0c9TMPXBb7gfGnpPtR0Ex-vIQTlb1XssFQXSnx4VmH-MhSbU8SeTSAGiJXh01wBLAfwuCyxcgR0c5BLg7HHGC3dRxo32w6wm1VEvjqHCucZLkCqUuiq-ch7xV2c1rFASk-UI-sphQ9b1HLtOhNYmQokvrZNsGAMPGS7mkNdzd7Loj1mGYBn2qL4S2S8A40jQ9mA1Fn4IEz7KIL66aIFpYr5ArQKsCxf8OK3rtv8Mgj1QxWwc0j1dD--ZMRSrGJrccTvrPKMkUJv54xAVnwQ8WLPPC4W5inzfRHPFL_v-3ZO9b8fw8EqSMUJ0ZH3i3hza4KTo5ooTPy-gru0pU0e_sBQiyvk84_4wgM3kJOaKBMSzL6GKfuu1pUAQEdVeHZ6Y-e3wo9qlja_ZlTn7zkgkohrix5Yf4IQQnhPqlNb793QRMk2ufA_FrrjS1GErqdA.LHCIsoyFHqW9_xkJqMMeEg.661b99adcbdd41909ef3576fdf0671d6b50f504739ef61009d42abef8008419a" target="_blank" rel="noopener">Fagord</a></li>
+                        </ul>
+                    </details>
+                </article>
+
+                <article class="card" id="Laesning">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
+                            </svg>
+                        </span>
+                        Læsning
+                    </h3>
+                    <p class="card-note">Test din læsning, læs hurtigere, og få hjælp til at forstå svære tekster.</p>
+                    <ul class="link-list">
+                        <li><a href="https://selvtest.nu/" target="_blank" rel="noopener">Test din læsning</a></li>
+                        <li><a href="https://techmieriber-sketch.github.io/Laeseflow/" target="_blank" rel="noopener">Læsehastighed med læseflow</a></li>
+                        <li><a href="https://drive.google.com/drive/folders/1sQ8UU-8x9_iZqeEqkhDzOxxYsEBVkRWS?usp=sharing" target="_blank" rel="noopener">Læseflow som browserudvidelse</a></li>
+                        <li><a href="https://m365.cloud.microsoft.com/chat/?titleId=T_611d71e5-9f86-b714-c54a-dbb0c755d0b9" target="_blank" rel="noopener">Læseforståelse med Copilot</a></li>
+                        <li><a href="https://chatgpt.com/g/g-68a344817af08191a37a997523aba125-laeseforstaelse" target="_blank" rel="noopener">Læseforståelse med ChatGPT</a></li>
+                        <li><a href="https://youtu.be/2KQiITCtX8Y" target="_blank" rel="noopener">Oplæsning med Edge-browseren</a></li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Vis 10 mere</span>
+                            <span class="lbl-less">Vis mindre</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="Grundprompt-til-tekstforstaaelse.pdf" target="_blank" rel="noopener">Grundprompt til tekstforståelse</a></li>
+                            <li><a href="https://notebooklm.google.com/" target="_blank" rel="noopener">Notebook LM</a></li>
+                            <li><a href="https://www.ilovepdf.com/" target="_blank" rel="noopener">Ilovepdf</a></li>
+                            <li><a href="Lærervejledning til Tekstanalyse med Copilot og ChatGPT.pdf" target="_blank" rel="noopener">Lærervejledning til tekstanalyse med Copilot og ChatGPT</a></li>
+                            <li><a href="https://m365.cloud.microsoft/chat/?titleId=T_64dbaf73-900b-343b-dd03-dea1dd535d94" target="_blank" rel="noopener">Tekstanalyse med Copilot</a></li>
+                            <li><a href="https://chatgpt.com/g/g-68c28a412bf48191a35367058a743be4-tekstanalyse" target="_blank" rel="noopener">Tekstanalyse med ChatGPT</a></li>
+                        </ul>
+                        <p class="group-label">Analysemodeller til</p>
+                        <ul class="link-list">
+                            <li><a href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Noveller</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Artikler</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Reklamer</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/1j9pmYw_DkWb_0L2dErX4rIXm3NStIVI7?usp=sharing" target="_blank" rel="noopener">Debatindlæg</a></li>
+                        </ul>
+                    </details>
+                </article>
+
+                <article class="card" id="Skrivehjaelp">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 20h9"/>
+                                <path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4z"/>
+                            </svg>
+                        </span>
+                        Skrivehjælp
+                    </h3>
+                    <p class="card-note">Få rettet stavefejl, forstå din opgave, og hold styr på dine noter.</p>
+                    <ul class="link-list">
+                        <li><a href="https://m365.cloud.microsoft.com/chat/?titleId=T_28c1653f-107f-84c4-511f-c221664dd09f" target="_blank" rel="noopener">Korrektur med Copilot</a></li>
+                        <li><a href="https://chatgpt.com/g/g-68b46da6d59c8191b4d23d3bfbd624a8-ret-tekst" target="_blank" rel="noopener">Korrektur med ChatGPT</a></li>
+                        <li><a href="https://m365.cloud.microsoft/chat/?titleId=T_11dc9572-f6cd-09dd-1bc5-ab0050f08ac7" target="_blank" rel="noopener">Forstå din opgave med Copilot</a></li>
+                        <li><a href="https://chatgpt.com/g/g-68c14bfa205c81919eeeea242b0412ac-forsta-din-opgave" target="_blank" rel="noopener">Forstå din opgave med ChatGPT</a></li>
+                        <li><a href="https://m365.cloud.microsoft/chat/?titleId=T_f5006552-f1ba-60f3-c44a-cc18c22d0b17" target="_blank" rel="noopener">Få styr på dine notater med Copilot</a></li>
+                        <li><a href="https://chatgpt.com/g/g-68c15251e6e08191bc074fdf6bafa772-notat-assistenten" target="_blank" rel="noopener">Få styr på dine notater med ChatGPT</a></li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Skriveskabeloner (6)</span>
+                            <span class="lbl-less">Skjul skriveskabeloner</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://drive.google.com/drive/folders/1WfB3x6a-eV5GEbo9pc_ERHtAP1_iAIuN?usp=sharing" target="_blank" rel="noopener">Skriveskabelon til notater</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Læserbrev</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Instruktion</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Debatindlæg</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Fagtekst</a></li>
+                            <li><a href="https://drive.google.com/drive/folders/11AElU4yd0JM74nyguXlmzNuskJSNCmc9?usp=sharing" target="_blank" rel="noopener">Fortælling</a></li>
+                        </ul>
+                    </details>
+                </article>
+
+                <article class="card" id="Nota">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 18v-6a9 9 0 0118 0v6"/>
+                                <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+                            </svg>
+                        </span>
+                        Nota
+                    </h3>
+                    <p class="card-note">Lån lydbøger og studiebøger.</p>
+                    <ul class="link-list">
+                        <li><a href="https://nota.dk/bibliotek/notalogin#nemlog-in" target="_blank" rel="noopener">Log ind på Nota med MitID</a></li>
+                        <li><a href="https://youtu.be/G03H0yxigXc?si=XG2xL2qaxqYwnq_l" target="_blank" rel="noopener">Lydbøger på Nota</a></li>
+                        <li><a href="https://www.youtube.com/watch?v=blyTZLL_xHY" target="_blank" rel="noopener">Download skolebog fra Nota og få den læst højt med AppWriter</a></li>
+                        <li><a href="https://nota.dk/viden/videoguides-til-brug-af-l%C3%A5ste-studieb%C3%B8ger" target="_blank" rel="noopener">Videoguides til låste studiebøger</a></li>
+                        <li><a href="https://nota.dk/bibliotek/hjaelp/notaapp" target="_blank" rel="noopener">Nota app</a></li>
+                    </ul>
+                </article>
+
+                <article class="card" id="Google-Lens">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2h3l2-3h6l2 3h3a2 2 0 012 2z"/>
+                                <circle cx="12" cy="13" r="3.4"/>
+                            </svg>
+                        </span>
+                        Google Lens
+                    </h3>
+                    <p class="card-note">Tag et billede af en tekst med telefonen, og få den læst op eller oversat.</p>
+                    <ul class="link-list">
+                        <li><a href="https://www.youtube.com/watch?v=L71XVuoZHlM" target="_blank" rel="noopener">Hvordan bruger man Google Lens?</a></li>
+                    </ul>
+                </article>
+
+            </div>
+
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <h2>Sprog og grammatik</h2>
+                <p>Korte videoer om dansk grammatik, udtale og engelsk grammatik</p>
+            </div>
+
+            <div class="grid">
+
+                <article class="card" id="Dansk-som-andetsprog">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9.5"/>
+                                <path d="M2.5 12h19"/>
+                                <path d="M12 2.5c2.8 3 2.8 16 0 19M12 2.5c-2.8 3-2.8 16 0 19"/>
+                            </svg>
+                        </span>
+                        Dansk som andetsprog
+                    </h3>
+                    <p class="card-note">Udtale, ordforråd og danske dialoger til dig, der lærer dansk.</p>
+                    <ul class="link-list">
+                        <li><a href="https://ordlab.dk/alle-videoer/?share=Bedre!%!dansk!%!(Gratis)!%!%!3751,3765" target="_blank" rel="noopener">Bedre dansk (gratis)</a></li>
+                        <li><a href="https://ordlab.dk/alle-videoer/?share=Bedre!%!dansk!%!(Premium)!%!%!3754,3760,3763,3757" target="_blank" rel="noopener">Bedre dansk (premium)</a></li>
+                        <li><a href="https://drive.google.com/drive/folders/1cUmiCmQzDshnFyYLvbC4thB_P5lyc0HM?usp=sharing" target="_blank" rel="noopener">Sprogmakker</a></li>
+                        <li><a href="https://www.youtube.com/watch?v=MFvDGZVD3Qw&list=PLk6g9tySafarm-24K2ztZRXHhjkG9R2LC" target="_blank" rel="noopener">Sådan siger man</a></li>
+                        <li><a href="https://www.youtube.com/watch?v=WiHkOa55ZZI&list=PLk6g9tySafar_Zbj-93nFFzW4GnKsjM1c" target="_blank" rel="noopener">Danske dialoger</a></li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Vis 7 mere om udtale</span>
+                            <span class="lbl-less">Vis mindre</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://www.youtube.com/watch?v=Ik_0DJu_dP8&list=PLk6g9tySafaqdGAp4lufNQU9o-b-C0CPG" target="_blank" rel="noopener">Danish Vowels</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=0vaSpM3LenM&list=PLk6g9tySafapSyrz09XR_5swfBYrwLYrg" target="_blank" rel="noopener">Danske vokaler</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=W9YgPXDtDV0&list=PLk6g9tySafaqKlQ0uFD2uGikcZ4SbG2Vf" target="_blank" rel="noopener">Danske konsonanter</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=BHPKB9sBJT8&list=PLk6g9tySafaqjJJaz9OTTHoTFJjFN7dLo" target="_blank" rel="noopener">Danish Pronunciation for beginners</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=W9YgPXDtDV0&list=PLk6g9tySafapZcYjKW0lffiCJBiOWg3lX" target="_blank" rel="noopener">Dansk udtale for lidt øvede</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=sh9arggYnrY&list=PLk6g9tySafaoeb8kXu9KBAjagCxCymcWY" target="_blank" rel="noopener">Dansk udtale for øvede</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=OXkDp4uA2aA&list=PLzQVrtlP5LA4oTQxygqdygvw8lxy58wDs" target="_blank" rel="noopener">Dansk sprog, grammatik og udtale</a></li>
+                        </ul>
+                    </details>
+                </article>
+
+                <article class="card" id="Dansk-grammatik">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M4 6h16"/>
+                                <path d="M4 12h11"/>
+                                <path d="M4 18h7"/>
+                            </svg>
+                        </span>
+                        Dansk grammatik
+                    </h3>
+                    <p class="card-note">Korte videoer om kommaer, nutids-r og ord der let forveksles.</p>
+                    <ul class="link-list">
+                        <li><a href="https://youtu.be/6xCGhXug9V0?si=Qda-hL_WusaorVQT" target="_blank" rel="noopener">Verber: Nutids-r eller navneform?</a></li>
+                        <li><a href="https://youtu.be/mrpcyFIbHNE?si=KdJfXunfmATfFjxF" target="_blank" rel="noopener">Sammensatte ord</a></li>
+                        <li><a href="https://youtu.be/ptjTAxh8gvI?si=OzIBUdFaxZolJvTF" target="_blank" rel="noopener">Ordforveksling: for eller får?</a></li>
+                        <li><a href="https://youtu.be/-u5LkXD3GaA?si=dRPMiHRsUyafe1uy" target="_blank" rel="noopener">Ordforveksling: at eller og?</a></li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Vis 12 mere</span>
+                            <span class="lbl-less">Vis mindre</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://youtu.be/VWOvWcvLU98?si=2kge6oXZYcOam6rw" target="_blank" rel="noopener">Ene/ende</a></li>
+                            <li><a href="https://youtu.be/fWTHKk-s548?si=byEiDqokB_b8JbQF" target="_blank" rel="noopener">Verbernes form: -t eller -ede i kort tillægsform</a></li>
+                            <li><a href="https://youtu.be/M1nABMwHeik?si=_dxW_cQ6kc7r7q1q" target="_blank" rel="noopener">Substantiver: r-problemer med navneord i flertal</a></li>
+                            <li><a href="https://youtu.be/iuhk3y9GV5k?si=WVl_PxZv9Elbb7Zk" target="_blank" rel="noopener">Genitiv: Apostrof eller ej ved ejefald?</a></li>
+                            <li><a href="https://youtu.be/RLjIOJHzCAo?si=eYyaH0R_CRLIz7qF" target="_blank" rel="noopener">Adverbier: Biord med eller uden -t</a></li>
+                            <li><a href="https://youtu.be/cSUX7J0mlbI?si=gmxlX3N9O6CNX_cI" target="_blank" rel="noopener">Ordforveksling: ad eller af?</a></li>
+                            <li><a href="https://youtu.be/tK8bm8gM8Qw?si=g9cxjUdIAhYmDdqr" target="_blank" rel="noopener">Ordforveksling: hans, hendes eller sin?</a></li>
+                            <li><a href="https://youtu.be/FsBuYDxA5BQ?si=smRp8Vq4evDQp56j" target="_blank" rel="noopener">Ordforveksling: ligge eller lægge?</a></li>
+                            <li><a href="https://youtu.be/GdUA-pSQv8Q?si=d1h4yVzo3hWCttha" target="_blank" rel="noopener">Ordforveksling: nogen eller nogle?</a></li>
+                            <li><a href="https://youtu.be/kAUGGk_2BqY?si=kr3wRZj8RqYFFcBo" target="_blank" rel="noopener">Ordforveksling: synes eller syntes?</a></li>
+                            <li><a href="https://youtu.be/PojaXwWfuoQ?si=0fsmBq8dNhLSjdbP" target="_blank" rel="noopener">De 7 gyldne kommaregler</a></li>
+                            <li><a href="https://youtu.be/el8RTUh7TO8?si=evUbt9UD-Is4OQLt" target="_blank" rel="noopener">Kommaregler</a></li>
+                        </ul>
+                    </details>
+                </article>
+
+                <article class="card" id="Engelsk">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                            </svg>
+                        </span>
+                        Engelsk
+                    </h3>
+                    <p class="card-note">Øv dig med en sprogpartner, og se videoer om engelsk grammatik.</p>
+                    <ul class="link-list">
+                        <li><a href="https://chatgpt.com/g/g-68cd32c663808191bbf9e059118557ff-sprogpartner-engelsk-som-andetsprog" target="_blank" rel="noopener">Sprogpartner med ChatGPT</a></li>
+                        <li><a href="https://m365.cloud.microsoft:443/chat/?titleId=T_c245d6f2-fce8-4b89-ad29-15b2c4112f63&source=embedded-builder" target="_blank" rel="noopener">Sprogpartner med Copilot</a></li>
+                        <li><a href="https://youtu.be/-20UUtdWRDk?si=dGVFByz0CXjnRy9v" target="_blank" rel="noopener">Hvad er kongruens?</a></li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Engelsk grammatik (27)</span>
+                            <span class="lbl-less">Skjul engelsk grammatik</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://youtu.be/9nkyxQcekLk?si=UesAkuN1kPOMbRYx" target="_blank" rel="noopener">Kongruens: 'There' som foreløbigt grundled</a></li>
+                            <li><a href="https://youtu.be/gVKNeDu7VBQ?si=wBgV47gOKdRYKjJg" target="_blank" rel="noopener">Kongruens: Dobbeltbøjning af udsagnsled (fejltype)</a></li>
+                            <li><a href="https://youtu.be/kQ3fGI7wK8U?si=6kIsj7WRmYgRdO_L" target="_blank" rel="noopener">Kongruens: Sammentrækning med BE, DO og negationen NOT</a></li>
+                            <li><a href="https://youtu.be/A5OponoluXc?si=e3itPvQXUGsRoviR" target="_blank" rel="noopener">Verbernes form: Udsagnsord i førnutid</a></li>
+                            <li><a href="https://youtu.be/Z-GqIu9WnM0?si=gw2vU5sE1r-kstTR" target="_blank" rel="noopener">Verbernes form: Udsagnsord i udvidet tid</a></li>
+                            <li><a href="https://youtu.be/wDv-xHscAzg?si=nMakdOp9xGnoxJmt" target="_blank" rel="noopener">Verbernes form: Lang tillægsform efter forholdsord</a></li>
+                            <li><a href="https://youtu.be/GV08z_nWWBs?si=xjZHJJtHGgvk3swE" target="_blank" rel="noopener">Verbernes tid: Tidsspring i udsagnsord (fejltype)</a></li>
+                            <li><a href="https://youtu.be/TY0Maj0QAoA?si=eZ7lW_w716MdXugo" target="_blank" rel="noopener">Hjælpeudsagnsordet 'do'</a></li>
+                            <li><a href="https://youtu.be/u88zK-pd7jo?si=5xrlqg13iNROTWfi" target="_blank" rel="noopener">Præpositioner: Forholdsordene AT, IN og ON</a></li>
+                            <li><a href="https://youtu.be/ekvcgqsLDYg?si=znrRsG7nZsxkyIc_" target="_blank" rel="noopener">Substantiver: Navneord med endelsen -f(e)</a></li>
+                            <li><a href="https://youtu.be/awGByQU8fHM?si=uPdB9XhY_r37jQF7" target="_blank" rel="noopener">Artikler: Bestemt og ubestemt kendeord</a></li>
+                            <li><a href="https://youtu.be/P-hRJZTKnV4?si=HOerKUp0KNPDJMet" target="_blank" rel="noopener">Artikler: 4 specifikke eksempler med kendeord</a></li>
+                            <li><a href="https://youtu.be/qCiw3UyU12o?si=gxH2UldBsMd_pvCe" target="_blank" rel="noopener">Genitiv: Hvordan danner man ejefald?</a></li>
+                            <li><a href="https://youtu.be/ga6jy3B9X1s?si=xjr31VfNUkIdA80F" target="_blank" rel="noopener">Pronominer: Påpegende stedord</a></li>
+                            <li><a href="https://youtu.be/4igaFnxF9VI?si=AV13Do1JEerKc6ey" target="_blank" rel="noopener">Pronominer: Henførende stedord</a></li>
+                            <li><a href="https://youtu.be/z-s03uvlVoo?si=6Qkt9zRdPrYULg3p" target="_blank" rel="noopener">Pronominer: Tilbageførende stedord</a></li>
+                            <li><a href="https://youtu.be/6g7Mbo4RwcY?si=W9WAHKfvUrPNgaEy" target="_blank" rel="noopener">Adjektiver: Tillægsord med 1 stavelse</a></li>
+                            <li><a href="https://youtu.be/6g7Mbo4RwcY?si=7X79NR4HmSChDjzY" target="_blank" rel="noopener">Adjektiver: Tillægsord med 2 stavelser</a></li>
+                            <li><a href="https://youtu.be/KOWtkkIQtzI?si=iD856nBB3uQdThuc" target="_blank" rel="noopener">Adjektiver: Tillægsord med 3+ stavelser</a></li>
+                            <li><a href="https://youtu.be/ddTX37eZXnY?si=k_6zvj_WAjvmoHJr" target="_blank" rel="noopener">Adjektiver: Dobbelt gradbøjning af tillægsord (fejltype)</a></li>
+                            <li><a href="https://youtu.be/8P2z67Ds_0Q?si=LSrIiB4TnebTZWj7" target="_blank" rel="noopener">Adjektiver: Uregelmæssige tillægsord</a></li>
+                            <li><a href="https://youtu.be/ZV9qbCWvzts?si=j7tO9H-ASSnxetfm" target="_blank" rel="noopener">Adjektiver: Tillægsord må ikke stå alene</a></li>
+                            <li><a href="https://youtu.be/BAWu24WHmIY?si=nN6E57WCqSN5yOyU" target="_blank" rel="noopener">Adverbier: Grads- og hyppighedsbiord</a></li>
+                            <li><a href="https://youtu.be/0hr1jnhUVYA?si=Wnwc1outE-1-CFT8" target="_blank" rel="noopener">Adverbier: Tids-, steds- og mådesbiord</a></li>
+                            <li><a href="https://youtu.be/Q8kIvT6-5mE?si=k52oTrEnSTFnpPWw" target="_blank" rel="noopener">Ordstilling: Lange biordsled</a></li>
+                            <li><a href="https://youtu.be/yEsof43846A?si=LGlRwwokeSuA5a20" target="_blank" rel="noopener">Ordstilling: to BE og grundleddet</a></li>
+                            <li><a href="https://youtu.be/PE4R8jP9cKY?si=ABa2cjgIV1pIAT1D" target="_blank" rel="noopener">Ordstilling: to BE og grundleddet (fortsat)</a></li>
+                        </ul>
+                    </details>
+                </article>
+
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-head">
+                <h2>Om ordblindhed</h2>
+                <p>Forstå hvad ordblindhed er, og hvordan det føles</p>
+            </div>
+
+            <div class="grid">
+
+                <article class="card" id="Baggrundsviden">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9.5"/>
+                                <path d="M12 16.5v-5"/>
+                                <path d="M12 8h.01"/>
+                            </svg>
+                        </span>
+                        Baggrundsviden
+                    </h3>
+                    <p class="card-note">Videoer og viden om, hvad ordblindhed er.</p>
+                    <ul class="link-list">
+                        <li><a href="https://youtu.be/xLAJxrBgsdg?si=6l6mtPTfwPqtCAX0" target="_blank" rel="noopener">Den ordblinde hjerne</a></li>
+                        <li><a href="https://youtu.be/86giFyrNesw?si=1vZliafMOk3X9sh-" target="_blank" rel="noopener">Hvordan opleves ordblindhed?</a></li>
+                        <li><a href="https://www.ordblindeforeningen.dk/" target="_blank" rel="noopener">Ordblindeforeningen</a></li>
+                    </ul>
+                </article>
+
+                <article class="card" id="Visuel-ordblindhed">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M1.8 12S5.6 4.8 12 4.8 22.2 12 22.2 12 18.4 19.2 12 19.2 1.8 12 1.8 12z"/>
+                                <circle cx="12" cy="12" r="3.2"/>
+                            </svg>
+                        </span>
+                        Visuel ordblindhed
+                    </h3>
+                    <p class="card-note">Når bogstaverne flimrer, flyder sammen eller flytter sig.</p>
+                    <ul class="link-list">
+                        <li><a href="https://lexilens.dk/" target="_blank" rel="noopener">Sådan opleves visuelle læseudfordringer</a></li>
+                        <li><a href="https://techmieriber-sketch.github.io/Laesefilter/" target="_blank" rel="noopener">Læsefilter</a></li>
+                        <li><a href="https://drive.google.com/drive/folders/1YgsDodYVOIrDOiHKYSH0ky-sWkEHZARg?usp=sharing" target="_blank" rel="noopener">Læsefilter som browserudvidelse</a></li>
+                    </ul>
+                </article>
+
+            </div>
+        </section>
+
+    </main>
+
     <script>
-        
-        // Search functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('search-input');
-            const searchResults = document.getElementById('search-results');
-            
-            // Search function
-            function performSearch(query) {
-                if (query.length < 2) {
-                    searchResults.style.display = 'none';
-                    return;
-                }
-                
-                const results = [];
-                const sections = document.querySelectorAll('.columns > div');
-                
-                sections.forEach((section, index) => {
-                    if (index === 0) return; // Skip the first info section
-                    
-                    const title = section.querySelector('h2, h3')?.textContent || '';
-                    const links = section.querySelectorAll('a');
-                    const sectionText = section.textContent.toLowerCase();
-                    
-                    if (sectionText.includes(query.toLowerCase())) {
-                        const matchingLinks = [];
-                        
-                        links.forEach(link => {
-                            if (link.textContent.toLowerCase().includes(query.toLowerCase())) {
-                                matchingLinks.push({
-                                    text: link.textContent,
-                                    href: link.href,
-                                    section: title
-                                });
-                            }
-                        });
-                        
-                        if (matchingLinks.length > 0) {
-                            results.push({
-                                section: title,
-                                links: matchingLinks
-                            });
-                        }
-                    }
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('search-input');
+            const results = document.getElementById('search-results');
+            const cards = Array.from(document.querySelectorAll('.card'));
+
+            function escapeHtml(text) {
+                return text.replace(/[&<>"']/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
                 });
-                
-                displayResults(results, query);
             }
-            
-            // Display search results
-            function displayResults(results, query) {
-                if (results.length === 0) {
-                    searchResults.innerHTML = '<div class="no-results">Ingen resultater fundet for "' + query + '"</div>';
-                    searchResults.style.display = 'block';
+
+            function highlight(text, query) {
+                const at = text.toLowerCase().indexOf(query);
+                if (at < 0) return escapeHtml(text);
+                return escapeHtml(text.slice(0, at)) +
+                    '<span class="highlight">' + escapeHtml(text.slice(at, at + query.length)) + '</span>' +
+                    escapeHtml(text.slice(at + query.length));
+            }
+
+            function hide() {
+                results.style.display = 'none';
+                results.innerHTML = '';
+            }
+
+            function render(groups, query) {
+                if (!groups.length) {
+                    results.innerHTML = '<div class="search-empty">Ingen resultater for ”' + escapeHtml(query) + '”</div>';
+                    results.style.display = 'block';
                     return;
                 }
-                
+
                 let html = '';
-                results.forEach(result => {
-                    html += '<div class="search-result">';
-                    html += '<h3>' + result.section + '</h3>';
-                    result.links.forEach(link => {
-                        const highlightedText = link.text.replace(
-                            new RegExp(query, 'gi'), 
-                            '<span class="highlight">$&</span>'
-                        );
-                        html += '<p><a href="' + link.href + '" target="_blank" class="cta-link">' + highlightedText + '</a></p>';
+                groups.forEach(function (group) {
+                    html += '<div class="search-group"><h3>' + escapeHtml(group.title) + '</h3>';
+                    group.links.forEach(function (link) {
+                        html += '<a href="' + link.href + '" target="_blank" rel="noopener">' +
+                            highlight(link.text, query) + '</a>';
                     });
                     html += '</div>';
                 });
-                
-                searchResults.innerHTML = html;
-                searchResults.style.display = 'block';
+
+                results.innerHTML = html;
+                results.style.display = 'block';
             }
-            
-            // Event listeners
-            searchInput.addEventListener('input', function() {
-                const query = this.value.trim();
-                performSearch(query);
+
+            function search(raw) {
+                const query = raw.trim().toLowerCase();
+                if (query.length < 2) { hide(); return; }
+
+                const groups = [];
+                cards.forEach(function (card) {
+                    const title = card.querySelector('.card-title').textContent.trim();
+                    const links = Array.from(card.querySelectorAll('.link-list a'));
+                    let matches = links.filter(function (a) {
+                        return a.textContent.toLowerCase().includes(query);
+                    });
+
+                    // Matcher man kategoriens navn, vises hele kategorien
+                    if (!matches.length && title.toLowerCase().includes(query)) {
+                        matches = links;
+                    }
+
+                    if (matches.length) {
+                        groups.push({
+                            title: title,
+                            links: matches.map(function (a) {
+                                return { text: a.textContent.trim(), href: a.getAttribute('href') };
+                            })
+                        });
+                    }
+                });
+
+                render(groups, query);
+            }
+
+            input.addEventListener('input', function () { search(this.value); });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { this.value = ''; hide(); this.blur(); }
             });
-            
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    const query = this.value.trim();
-                    performSearch(query);
-                }
-            });
-            
-            // Clear results when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-                    searchResults.style.display = 'none';
-                }
+
+            document.addEventListener('click', function (e) {
+                if (!results.contains(e.target) && e.target !== input) hide();
             });
         });
     </script>
 </body>
 </html>
-
-
