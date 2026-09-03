@@ -208,101 +208,8 @@
             text-shadow: 0 2px 10px rgba(4, 12, 22, 0.75), 0 8px 34px rgba(4, 12, 22, 0.6);
         }
 
-        .hero-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 26px;
-            padding: 14px 30px;
-            font-size: clamp(15px, 1.7vw, 18px);
-            font-weight: 700;
-            color: #ffffff;
-            text-decoration: none;
-            border-radius: 999px;
-            border: 1px solid rgba(179, 217, 255, 0.5);
-            background: linear-gradient(135deg, rgba(255,255,255,0.14) 0%, rgba(142,201,255,0.24) 100%);
-            -webkit-backdrop-filter: blur(6px);
-            backdrop-filter: blur(6px);
-            box-shadow:
-                0 10px 30px rgba(4, 14, 26, 0.35),
-                0 0 24px rgba(142, 201, 255, 0.28),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5),
-                inset 0 -8px 18px rgba(88, 152, 214, 0.22);
-            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        /* Teksten og ikonerne skal ligge oven på glans-laget */
-        .hero-cta > * {
-            position: relative;
-            z-index: 1;
-        }
-        /* Blank overflade i den øverste halvdel, som på et glasknap */
-        .hero-cta::before {
-            content: "";
-            position: absolute;
-            top: 1px;
-            left: 1px;
-            right: 1px;
-            height: 52%;
-            border-radius: 999px 999px 50% 50% / 999px 999px 90% 90%;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.1) 55%, rgba(255, 255, 255, 0) 100%);
-            pointer-events: none;
-            z-index: 0;
-        }
-        /* Lysstribe der glider hen over knappen med langt interval */
-        .hero-cta::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: -50%;
-            width: 42%;
-            background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, 0.45) 50%, transparent 100%);
-            transform: skewX(-20deg);
-            animation: cta-shine 6s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 2;
-        }
-        .hero-cta:visited { color: #ffffff; }
-        .hero-cta:hover,
-        .hero-cta:focus-visible {
-            background: linear-gradient(135deg, rgba(255,255,255,0.26) 0%, rgba(142,201,255,0.38) 100%);
-            border-color: rgba(203, 231, 255, 0.95);
-            transform: translateY(-2px);
-            box-shadow:
-                0 14px 34px rgba(142, 201, 255, 0.3),
-                0 0 34px rgba(168, 214, 255, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6),
-                inset 0 -8px 18px rgba(88, 152, 214, 0.24);
-        }
-        .hero-cta:active { transform: translateY(0); }
-        .hero-cta .cta-icon {
-            width: 17px;
-            height: 17px;
-            flex: 0 0 auto;
-            color: rgba(214, 235, 255, 0.95);
-        }
-        .hero-cta .cta-arrow {
-            width: 15px;
-            height: 15px;
-            flex: 0 0 auto;
-            opacity: 0.8;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .hero-cta:hover .cta-arrow,
-        .hero-cta:focus-visible .cta-arrow {
-            transform: translateX(3px);
-            opacity: 1;
-        }
-        @keyframes cta-shine {
-            0%        { left: -50%; }
-            35%, 100% { left: 130%; }
-        }
         @media (prefers-reduced-motion: reduce) {
             html { scroll-behavior: auto; }
-            .hero-cta::after { animation: none; opacity: 0; }
         }
 
         .hero-tagline {
@@ -623,7 +530,6 @@
             .hero-inner { padding: 10px 18px 0; }
             main { padding: 24px 16px 70px; }
             .section + .section { margin-top: 42px; }
-            .hero-cta { padding: 13px 24px; }
         }
     </style>
 </head>
@@ -660,18 +566,6 @@
 
         <div class="hero-inner">
             <h1>Læsevejlederen</h1>
-
-            <a href="https://ai.aarhustech.dk/w/ai/dendigitalelsevejleder/" class="hero-cta" target="_blank" rel="noopener">
-                <svg class="cta-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                    <path d="M12 2.5l1.9 4.7 4.7 1.9-4.7 1.9L12 15.7l-1.9-4.7-4.7-1.9 4.7-1.9L12 2.5z"/>
-                    <path d="M18.5 14.5l.95 2.35 2.35.95-2.35.95-.95 2.35-.95-2.35-2.35-.95 2.35-.95.95-2.35z" opacity="0.85"/>
-                    <path d="M5.5 15l.75 1.85L8.1 17.6l-1.85.75L5.5 20.2l-.75-1.85L2.9 17.6l1.85-.75L5.5 15z" opacity="0.7"/>
-                </svg>
-                <span>Prøv den digitale læsevejleder</span>
-                <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="M5 12h13M12 5l7 7-7 7"/>
-                </svg>
-            </a>
 
             <p class="hero-tagline">Få hjælp til læsning, skrivning, svære tekster, fagbegreber og digitale læse- og skriveværktøjer</p>
 
