@@ -420,6 +420,8 @@
         .card {
             display: flex;
             flex-direction: column;
+            /* Ensartet bundlinje i gitteret: kort med få links fylder lige så meget som de øvrige */
+            min-height: 330px;
             padding: 20px 22px 18px;
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -594,6 +596,7 @@
         @media (max-width: 660px) {
             body { font-size: 16px; }
             .grid { grid-template-columns: 1fr; gap: 14px; }
+            .card { min-height: 0; }
             .topbar { justify-content: center; padding: 14px 14px 0; }
             .topbar-info { margin-right: 0; }
             .topbar a { font-size: 13px; padding: 7px 12px; }
@@ -692,36 +695,39 @@
         <section class="section">
             <div class="grid">
 
-                <article class="card" id="AppWriter">
+                <article class="card" id="Cliarly">
                     <h3 class="card-title">
                         <span class="card-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M11 5L6 9H3v6h3l5 4V5z"/>
-                                <path d="M15.5 8.5a5 5 0 010 7"/>
-                                <path d="M18.5 5.5a9 9 0 010 13"/>
+                                <path d="M3 6a2 2 0 012-2h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                                <path d="M3 9h18"/>
+                                <path d="M6.5 6.5h.01M9.5 6.5h.01"/>
                             </svg>
                         </span>
-                        AppWriter
+                        Cliarly
                     </h3>
-                    <p class="card-note">Læser tekst højt for dig og hjælper dig med at stave, mens du skriver.</p>
+                    <p class="card-note">Oplæsning, omskrivning og tale til tekst direkte i browseren.</p>
                     <ul class="link-list">
-                        <li><a href="https://youtu.be/aCQG1ovE7HA" target="_blank" rel="noopener">Introduktion til AppWriter</a></li>
-                        <li><a href="https://it-info.aarhustech.dk/da/software/generelt/appwriter" target="_blank" rel="noopener">Hent AppWriter</a></li>
-                        <li>
-                            <details class="info-toggle info-toggle-nested">
-                                <summary>
-                                    <svg class="toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                        <path d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                    Log ind i AppWriter
-                                </summary>
-                                <p class="toggle-content">Du logger ind i AppWriter ved at vælge ’Unilogin’ og herefter ’MitID’</p>
-                            </details>
-                        </li>
-                        <li><a href="https://chromewebstore.google.com/detail/appwriter-cloud/lokadhdaghfjbmailhhenifjejpokche?hl=da&pli=1" target="_blank" rel="noopener">Hent AppWriter Cloud</a></li>
-                        <li><a href="https://microsoftedge.microsoft.com/addons/detail/appwriter-cloud/ejkmeinadgefifnopiacgpjlkjdjhhkc?hl=en-GB#:~:text=AppWriter%20is%20able%20to%20convert%20your%20speech%20to,in%20any%20PDF%20e.g.%20homework%2C%20e-books%2C%20and%20forms." target="_blank" rel="noopener">AppWriter Edge Add-on</a></li>
-                        <li><a href="https://www.youtube.com/watch?v=WJUn89vx0vM" target="_blank" rel="noopener">Jokertegn</a></li>
+                        <li><a href="https://youtu.be/rnFdKV4sGFY?si=rRlA13ITNFQeHXu9" target="_blank" rel="noopener">Kom godt i gang med Cliarlys browserudvidelse</a></li>
+                        <li><a href="https://youtu.be/A23grx2U2fk?si=1f_CdAN_KU7XWLLc" target="_blank" rel="noopener">Tips til Cliarlys PDF-reader</a></li>
+                        <li><a href="https://youtu.be/90uCQoNXJY4?si=zkSvu4MESO7Gv3Hq" target="_blank" rel="noopener">Sådan skriver du hurtigere med Cliarly</a></li>
+                        <li><a href="https://youtu.be/KhD72tO9Ogg?si=zdQ6c6TvMaE2cUSQ" target="_blank" rel="noopener">Prøv Cliarlys ’Omskriv-tekst-funktion’ og få inspiration til din formidling</a></li>
                     </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Vis 4 mere</span>
+                            <span class="lbl-less">Vis mindre</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://youtu.be/ueSvdpQgpgw?si=OBXCdtSohquluvnm" target="_blank" rel="noopener">Cliarly Corrected</a></li>
+                            <li><a href="https://youtu.be/pIN_N_EslKc?si=tdkspYulBA8ZvRMG" target="_blank" rel="noopener">Lav tekst til lydbøger (og forstå teksten bedre) med Cliarly</a></li>
+                            <li><a href="https://youtu.be/0jP2SGjXU6Y?si=1uXmkw9Rucp5khir" target="_blank" rel="noopener">Få styr på Cliarlys ’Tale til tekst’</a></li>
+                            <li><a href="https://youtu.be/3WnzxeVJMJs?si=Um4Ho-NDDu6CkUGb" target="_blank" rel="noopener">Guide til Cliarlys genvejstaster</a></li>
+                        </ul>
+                    </details>
                 </article>
 
                 <article class="card" id="Intowords">
@@ -739,20 +745,12 @@
                     <ul class="link-list">
                         <li><a href="https://www.vitec-mv.com/videncenter/videoguides/?f0=17315" target="_blank" rel="noopener">Videoguides til IntoWords</a></li>
                     </ul>
-                    <details class="more">
-                        <summary>
-                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M9 5l7 7-7 7"/>
-                            </svg>
-                            <span class="lbl-more">Intowords-træneren (3)</span>
-                            <span class="lbl-less">Skjul Intowords-træneren</span>
-                        </summary>
-                        <ul class="link-list">
-                            <li><a href="https://vimeo.com/744562499/065d453bdd" target="_blank" rel="noopener">Lydret stavning</a></li>
-                            <li><a href="https://vimeo.com/744561692/70a1c698b8" target="_blank" rel="noopener">Jokertegn</a></li>
-                            <li><a href="https://vimeo.com/744561444/469e14a3b1?turnstile=0.yWnD26pMbVpSzKDTHBdCx7taNKP3eiIqK0pmoZI7HV4siAYNWX0aNG7xCF8WqLIekO3fgWrnMKWIXfBwhUjJ-hpRKIbAdBY4IktEl11KWcT0I11Xaui-7fijTuQ_tS1wQliSW91dxcRaydBHCq5RzEhlr5KlPUDRymjFJw3Z7ndRW93Dj-p8LnCX6PAC3BKjtDP8rcQ25bNzRP2sNl2M14iEqslEjwBrypQHli35BqPN4uF822a50ro09kOWjnUF2eJQaQBS28oK0wYUhbRYc3JbNYWowzZ4ao_Nm93QvA6aEuPy9m1c7uJzXwDjSG5TTYAeTPPnbg72OrKc4N5rYraPhLTwLsemm6eZlmQvwciM7VXTo_W2xkRzqluke5zGb_4bm1F2hc0donr0lKxX7lNUrumNv8DoM4OiiJktvKT9tKMCPW5Uy0UUDaopizQRpbvbDc-QTj2afDA0D3tuVTF0c9TMPXBb7gfGnpPtR0Ex-vIQTlb1XssFQXSnx4VmH-MhSbU8SeTSAGiJXh01wBLAfwuCyxcgR0c5BLg7HHGC3dRxo32w6wm1VEvjqHCucZLkCqUuiq-ch7xV2c1rFASk-UI-sphQ9b1HLtOhNYmQokvrZNsGAMPGS7mkNdzd7Loj1mGYBn2qL4S2S8A40jQ9mA1Fn4IEz7KIL66aIFpYr5ArQKsCxf8OK3rtv8Mgj1QxWwc0j1dD--ZMRSrGJrccTvrPKMkUJv54xAVnwQ8WLPPC4W5inzfRHPFL_v-3ZO9b8fw8EqSMUJ0ZH3i3hza4KTo5ooTPy-gru0pU0e_sBQiyvk84_4wgM3kJOaKBMSzL6GKfuu1pUAQEdVeHZ6Y-e3wo9qlja_ZlTn7zkgkohrix5Yf4IQQnhPqlNb793QRMk2ufA_FrrjS1GErqdA.LHCIsoyFHqW9_xkJqMMeEg.661b99adcbdd41909ef3576fdf0671d6b50f504739ef61009d42abef8008419a" target="_blank" rel="noopener">Fagord</a></li>
-                        </ul>
-                    </details>
+                    <p class="group-label">Intowords-træneren</p>
+                    <ul class="link-list">
+                        <li><a href="https://vimeo.com/744562499/065d453bdd" target="_blank" rel="noopener">Lydret stavning</a></li>
+                        <li><a href="https://vimeo.com/744561692/70a1c698b8" target="_blank" rel="noopener">Jokertegn</a></li>
+                        <li><a href="https://vimeo.com/744561444/469e14a3b1?turnstile=0.yWnD26pMbVpSzKDTHBdCx7taNKP3eiIqK0pmoZI7HV4siAYNWX0aNG7xCF8WqLIekO3fgWrnMKWIXfBwhUjJ-hpRKIbAdBY4IktEl11KWcT0I11Xaui-7fijTuQ_tS1wQliSW91dxcRaydBHCq5RzEhlr5KlPUDRymjFJw3Z7ndRW93Dj-p8LnCX6PAC3BKjtDP8rcQ25bNzRP2sNl2M14iEqslEjwBrypQHli35BqPN4uF822a50ro09kOWjnUF2eJQaQBS28oK0wYUhbRYc3JbNYWowzZ4ao_Nm93QvA6aEuPy9m1c7uJzXwDjSG5TTYAeTPPnbg72OrKc4N5rYraPhLTwLsemm6eZlmQvwciM7VXTo_W2xkRzqluke5zGb_4bm1F2hc0donr0lKxX7lNUrumNv8DoM4OiiJktvKT9tKMCPW5Uy0UUDaopizQRpbvbDc-QTj2afDA0D3tuVTF0c9TMPXBb7gfGnpPtR0Ex-vIQTlb1XssFQXSnx4VmH-MhSbU8SeTSAGiJXh01wBLAfwuCyxcgR0c5BLg7HHGC3dRxo32w6wm1VEvjqHCucZLkCqUuiq-ch7xV2c1rFASk-UI-sphQ9b1HLtOhNYmQokvrZNsGAMPGS7mkNdzd7Loj1mGYBn2qL4S2S8A40jQ9mA1Fn4IEz7KIL66aIFpYr5ArQKsCxf8OK3rtv8Mgj1QxWwc0j1dD--ZMRSrGJrccTvrPKMkUJv54xAVnwQ8WLPPC4W5inzfRHPFL_v-3ZO9b8fw8EqSMUJ0ZH3i3hza4KTo5ooTPy-gru0pU0e_sBQiyvk84_4wgM3kJOaKBMSzL6GKfuu1pUAQEdVeHZ6Y-e3wo9qlja_ZlTn7zkgkohrix5Yf4IQQnhPqlNb793QRMk2ufA_FrrjS1GErqdA.LHCIsoyFHqW9_xkJqMMeEg.661b99adcbdd41909ef3576fdf0671d6b50f504739ef61009d42abef8008419a" target="_blank" rel="noopener">Fagord</a></li>
+                    </ul>
                 </article>
 
                 <article class="card" id="Laesning">
@@ -958,18 +956,18 @@
                     <p class="card-note">Se videoer om engelsk grammatik.</p>
                     <ul class="link-list">
                         <li><a href="https://youtu.be/-20UUtdWRDk?si=dGVFByz0CXjnRy9v" target="_blank" rel="noopener">Hvad er kongruens?</a></li>
+                        <li><a href="https://youtu.be/9nkyxQcekLk?si=UesAkuN1kPOMbRYx" target="_blank" rel="noopener">Kongruens: 'There' som foreløbigt grundled</a></li>
+                        <li><a href="https://youtu.be/gVKNeDu7VBQ?si=wBgV47gOKdRYKjJg" target="_blank" rel="noopener">Kongruens: Dobbeltbøjning af udsagnsled (fejltype)</a></li>
                     </ul>
                     <details class="more">
                         <summary>
                             <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M9 5l7 7-7 7"/>
                             </svg>
-                            <span class="lbl-more">Engelsk grammatik (27)</span>
+                            <span class="lbl-more">Engelsk grammatik (25)</span>
                             <span class="lbl-less">Skjul engelsk grammatik</span>
                         </summary>
                         <ul class="link-list">
-                            <li><a href="https://youtu.be/9nkyxQcekLk?si=UesAkuN1kPOMbRYx" target="_blank" rel="noopener">Kongruens: 'There' som foreløbigt grundled</a></li>
-                            <li><a href="https://youtu.be/gVKNeDu7VBQ?si=wBgV47gOKdRYKjJg" target="_blank" rel="noopener">Kongruens: Dobbeltbøjning af udsagnsled (fejltype)</a></li>
                             <li><a href="https://youtu.be/kQ3fGI7wK8U?si=6kIsj7WRmYgRdO_L" target="_blank" rel="noopener">Kongruens: Sammentrækning med BE, DO og negationen NOT</a></li>
                             <li><a href="https://youtu.be/A5OponoluXc?si=e3itPvQXUGsRoviR" target="_blank" rel="noopener">Verbernes form: Udsagnsord i førnutid</a></li>
                             <li><a href="https://youtu.be/Z-GqIu9WnM0?si=gw2vU5sE1r-kstTR" target="_blank" rel="noopener">Verbernes form: Udsagnsord i udvidet tid</a></li>
@@ -1045,6 +1043,49 @@
                         <li><a href="https://techmieriber-sketch.github.io/Laesefilter/" target="_blank" rel="noopener">Læsefilter</a></li>
                         <li><a href="https://drive.google.com/drive/folders/1YgsDodYVOIrDOiHKYSH0ky-sWkEHZARg?usp=sharing" target="_blank" rel="noopener">Læsefilter som browserudvidelse</a></li>
                     </ul>
+                </article>
+
+                <article class="card" id="AppWriter">
+                    <h3 class="card-title">
+                        <span class="card-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M11 5L6 9H3v6h3l5 4V5z"/>
+                                <path d="M15.5 8.5a5 5 0 010 7"/>
+                                <path d="M18.5 5.5a9 9 0 010 13"/>
+                            </svg>
+                        </span>
+                        AppWriter
+                    </h3>
+                    <p class="card-note">Læser tekst højt for dig og hjælper dig med at stave, mens du skriver.</p>
+                    <ul class="link-list">
+                        <li><a href="https://youtu.be/aCQG1ovE7HA" target="_blank" rel="noopener">Introduktion til AppWriter</a></li>
+                        <li><a href="https://it-info.aarhustech.dk/da/software/generelt/appwriter" target="_blank" rel="noopener">Hent AppWriter</a></li>
+                        <li>
+                            <details class="info-toggle info-toggle-nested">
+                                <summary>
+                                    <svg class="toggle-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                    Log ind i AppWriter
+                                </summary>
+                                <p class="toggle-content">Du logger ind i AppWriter ved at vælge ’Unilogin’ og herefter ’MitID’</p>
+                            </details>
+                        </li>
+                    </ul>
+                    <details class="more">
+                        <summary>
+                            <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M9 5l7 7-7 7"/>
+                            </svg>
+                            <span class="lbl-more">Vis 3 mere</span>
+                            <span class="lbl-less">Vis mindre</span>
+                        </summary>
+                        <ul class="link-list">
+                            <li><a href="https://chromewebstore.google.com/detail/appwriter-cloud/lokadhdaghfjbmailhhenifjejpokche?hl=da&pli=1" target="_blank" rel="noopener">Hent AppWriter Cloud</a></li>
+                            <li><a href="https://microsoftedge.microsoft.com/addons/detail/appwriter-cloud/ejkmeinadgefifnopiacgpjlkjdjhhkc?hl=en-GB#:~:text=AppWriter%20is%20able%20to%20convert%20your%20speech%20to,in%20any%20PDF%20e.g.%20homework%2C%20e-books%2C%20and%20forms." target="_blank" rel="noopener">AppWriter Edge Add-on</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=WJUn89vx0vM" target="_blank" rel="noopener">Jokertegn</a></li>
+                        </ul>
+                    </details>
                 </article>
 
             </div>
