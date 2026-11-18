@@ -46,7 +46,8 @@
 
         a:focus-visible,
         summary:focus-visible,
-        input:focus-visible {
+        input:focus-visible,
+        .video-tab:focus-visible {
             outline: 2px solid var(--accent);
             outline-offset: 3px;
             border-radius: 6px;
@@ -479,6 +480,40 @@
             line-height: 1.45;
         }
 
+        /* Faneblade, så to introduktioner kan deles om den samme plads i kortet */
+        .video-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0 0 10px;
+        }
+        .video-tab {
+            padding: 7px 13px;
+            font: inherit;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            border-radius: 999px;
+            cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+        .video-tab:hover {
+            color: var(--text);
+            border-color: var(--card-border-strong);
+        }
+        .video-tab[aria-selected="true"] {
+            color: #11314f;
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .video-tab {
+                transition: none;
+            }
+        }
+
         .link-list {
             margin: 0;
             padding: 0;
@@ -725,13 +760,25 @@
                         </span>
                         Cliarly
                     </h3>
-                    <p class="card-note">Oplæsning, omskrivning og tale til tekst direkte i browseren.</p>
-                    <figure class="card-video">
-                        <video controls preload="metadata" playsinline>
-                            <source src="Introduktion%20til%20Cliarly.mp4" type="video/mp4">
-                            Din browser kan ikke afspille videoen. <a href="Introduktion%20til%20Cliarly.mp4">Hent introduktionen her</a>.
-                        </video>
-                        <figcaption>Introduktion til Cliarly</figcaption>
+                    <p class="card-note">Oplæsning, skrivehjælp og tale til tekst.</p>
+                    <figure class="card-video" id="cliarly-video">
+                        <div class="video-tabs" role="tablist" aria-label="Vælg introduktion til Cliarly">
+                            <button type="button" class="video-tab" role="tab" id="cliarly-tab-eud" aria-controls="cliarly-panel-eud" aria-selected="true" data-caption="Cliarly til EUD">Til EUD</button>
+                            <button type="button" class="video-tab" role="tab" id="cliarly-tab-gym" aria-controls="cliarly-panel-gym" aria-selected="false" tabindex="-1" data-caption="Cliarly 10. klasse og gymnasiet">Til 10. klasse og gymnasiet</button>
+                        </div>
+                        <div role="tabpanel" id="cliarly-panel-eud" aria-labelledby="cliarly-tab-eud">
+                            <video controls preload="metadata" playsinline>
+                                <source src="Cliarly%20til%20EUD.mp4" type="video/mp4">
+                                Din browser kan ikke afspille videoen. <a href="Cliarly%20til%20EUD.mp4">Hent introduktionen her</a>.
+                            </video>
+                        </div>
+                        <div role="tabpanel" id="cliarly-panel-gym" aria-labelledby="cliarly-tab-gym" hidden>
+                            <video controls preload="metadata" playsinline>
+                                <source src="Cliarly%2010.%20klasse%20og%20gymnasiet.mp4" type="video/mp4">
+                                Din browser kan ikke afspille videoen. <a href="Cliarly%2010.%20klasse%20og%20gymnasiet.mp4">Hent introduktionen her</a>.
+                            </video>
+                        </div>
+                        <figcaption>Cliarly til EUD</figcaption>
                     </figure>
                     <ul class="link-list">
                         <li><a href="https://it-info.aarhustech.dk/da/software/generelt/Ops%C3%A6tning_af_Cliarly_p%C3%A5_Windows_og_Mac" target="_blank" rel="noopener">Hent Cliarly som desktop app</a></li>
@@ -1163,6 +1210,36 @@
 
             document.addEventListener('click', function (e) {
                 if (!results.contains(e.target) && e.target !== input) hide();
+            });
+
+            // Videofaneblade: kun ét panel vises, og den video man forlader sættes på pause
+            document.querySelectorAll('.card-video .video-tabs').forEach(function (tablist) {
+                const figure = tablist.closest('.card-video');
+                const caption = figure.querySelector('figcaption');
+                const tabs = Array.from(tablist.querySelectorAll('.video-tab'));
+
+                function select(tab, moveFocus) {
+                    tabs.forEach(function (other) {
+                        const isActive = other === tab;
+                        const panel = document.getElementById(other.getAttribute('aria-controls'));
+                        other.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                        other.tabIndex = isActive ? 0 : -1;
+                        panel.hidden = !isActive;
+                        if (!isActive) panel.querySelector('video').pause();
+                    });
+                    if (caption) caption.textContent = tab.dataset.caption;
+                    if (moveFocus) tab.focus();
+                }
+
+                tabs.forEach(function (tab, index) {
+                    tab.addEventListener('click', function () { select(tab); });
+                    tab.addEventListener('keydown', function (e) {
+                        const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+                        if (!step) return;
+                        e.preventDefault();
+                        select(tabs[(index + step + tabs.length) % tabs.length], true);
+                    });
+                });
             });
         });
     </script>
